@@ -22,6 +22,11 @@ def import_xls_to_df(filename, name_of_sheet):
 
 
 def clean(dataframe):
+    """
+    Cleans the imported data for easy processing
+    :params: a dataframe
+    :return: a dataframe with clean data
+    """
 
     # Someone thought it would be a good idea to add line breaks to the longer strings in Excel
     # This removes them 
@@ -30,11 +35,12 @@ def clean(dataframe):
     # There are also multiple spaces in the strings. This removes them.
     dataframe = dataframe.replace('\s+', ' ', regex=True)
     
-    # And now to remove the leading spaces
+    # And now to remove the leading spaces and lowercase everything
     # Need the try and except because some of the cols have integers
     for col in dataframe.columns:
         try:
             dataframe[col] = dataframe[col].map(lambda x: x.strip())
+            dataframe[col] = dataframe[col].str.lower()
         except:
             pass
             
@@ -44,14 +50,39 @@ def clean(dataframe):
 
 def cut_to_software(dataframe, colname):
     """
-    Cleans the dataframe based on advice we have been given by EPSRC:
-    :params: a dataframe and a colname of the column in which the years are stored
-    :return: a dataframe with only int years and NaNs
+    Takes in a dataframe and a column, and then creates a new dataframe containing only
+    the rows from the original dataframe that had the word "software" in that column
+    :params: a dataframe and a colname of the column in which the word software is to be found
+    :return: a dataframe with rows 
     """
 
     df_return = dataframe[dataframe[colname].str.contains('software')]
     
     return df_return
+
+
+def plot_bar_charts(dataframe,filename,title,xaxis,yaxis):
+    """
+    Takes a two-column dataframe and plots it
+    :params: a dataframe with two columns (one labels, the other a count), a filename for the resulting chart, a title, and titles for the
+    two axes (if title is None, then nothing is plotted))
+    :return: Nothing, just prints a chart
+    """
+
+    # For each one, interested in the count, the count for each research council, 
+
+
+    dataframe.plot(kind='bar', legend=None)
+    plt.title(title)
+    if xaxis != None:
+        plt.xlabel(xaxis)
+    if yaxis != None:
+        plt.ylabel(yaxis)
+    # This provides more space around the chart to make it prettier        
+    plt.tight_layout(True)
+    plt.savefig(CHART_STORE_DIR + filename + '.png', format = 'png', dpi = 150)
+    plt.show()
+    return
 
 
 def main():
@@ -68,12 +99,25 @@ def main():
     # Clean data
     df = clean(df)
 
+    # Create dataframes pertaining to the workd "software" used in different bits of the case study
+    # then find how many case studies each one relates to (hence the len() bit)
     df_in_title = cut_to_software(df, 'Title')
+    num_software_in_title = len(df_in_title)
+    
     df_in_summary = cut_to_software(df, 'Summary of the impact')
+    num_software_in_summary = len(df_in_summary)
+    
     df_in_underpin = cut_to_software(df, 'Underpinning research')
+    num_software_in_underpin = len(df_in_underpin)
+    
     df_in_references = cut_to_software(df, 'References to the research')
+    num_software_in_references = len(df_in_references)
+    
     df_in_details = cut_to_software(df, 'Details of the impact')
-#    df_in_sources = cut_to_software(df, 'Sources to corroborate the impact')
+    num_software_in_details = len(df_in_details)
+
+
+
 
     print('In title:')
     print(len(df_in_title))
