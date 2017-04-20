@@ -10,7 +10,8 @@ import math
 
 
 DATAFILENAME = "./data/CaseStudies.xlsx"
-EXCEL_RESULT_STORE = "./outputs/output.xlsx"
+STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.xlsx"
+EXCEL_RESULT_STORE = "./outputs/"
 
 def import_xls_to_df(filename, name_of_sheet):
     """
@@ -48,17 +49,48 @@ def clean(dataframe):
 
 
 
-def cut_to_software(dataframe, colname):
+def cut_to_specific_word(dataframe, specific_word):
     """
     Takes in a dataframe and a column, and then creates a new dataframe containing only
     the rows from the original dataframe that had the word "software" in that column
-    :params: a dataframe and a colname of the column in which the word software is to be found
-    :return: a dataframe with rows 
+    :params: a dataframe and a specific_word to look for in that dataframe
+    :return: nothing, but writes lists of case studies with the word in the 
+    Title, Summary, etc. to Excel spreadsheets
     """
 
-    df_return = dataframe[dataframe[colname].str.contains('software')]
+    # A list of the different parts of the case study (i.e. columns) in which
+    # we want to look
+    where_to_look = ['Title', 'Summary of the impact', 'Underpinning research', 'References to the research', 'Details of the impact']
+
+    # Initialise dict in which to store number of instances of specific_word found
+    how_many = {}
+
+    print('How many case studies have the word "software" in the...')    
+
+    # Go through list, look for the word software
+    for current in where_to_look:
+        current_df = dataframe[dataframe[current].str.contains(specific_word)]
+        # Store number of instances in dict
+        how_many[current] = len(current_df)
+        print(current + ": " + str(how_many[current]))
+        # Get ready to write to Excel
+        writer = ExcelWriter(EXCEL_RESULT_STORE + str(current) + '.xlsx')
+        # Write result to Excel
+        current_df.to_excel(writer, 'Sheet1')
+        # Close Excel writer
+        writer.save()
+
+    # Convert the list of how many instances to a dataframe,
+    # reorder the columns for prettiness and then write
+    # it to an Excel spreadsheet
+    how_many_df = pd.DataFrame(how_many, index = [0])
+    how_many_df = how_many_df[where_to_look]
     
-    return df_return
+    writer = ExcelWriter(EXCEL_RESULT_STORE + 'how_many_time_' + specific_word + '_was_found_in_case_studies.xlsx')
+    how_many_df.to_excel(writer,'Sheet1', index=False)
+    writer.save()
+
+    return
 
 
 def plot_bar_charts(dataframe,filename,title,xaxis,yaxis):
@@ -90,62 +122,19 @@ def main():
     Main function to run program
     """
     
-    # I write back to the original dataframe and pandas warns about that, so turning off the warning    
-    pd.options.mode.chained_assignment = None 
-    
     # Import dataframe from original xls
     df = import_xls_to_df(DATAFILENAME, 'CaseStudies')
 
     # Clean data
     df = clean(df)
-
-    # Create dataframes pertaining to the word "software" used in different bits of the case study
-    # then find how many case studies each one relates to (hence the len() bit)
-    df_in_title = cut_to_software(df, 'Title')
-    num_software_in_title = len(df_in_title)
     
-    df_in_summary = cut_to_software(df, 'Summary of the impact')
-    num_software_in_summary = len(df_in_summary)
-    
-    df_in_underpin = cut_to_software(df, 'Underpinning research')
-    num_software_in_underpin = len(df_in_underpin)
-    
-    df_in_references = cut_to_software(df, 'References to the research')
-    num_software_in_references = len(df_in_references)
-    
-    df_in_details = cut_to_software(df, 'Details of the impact')
-    num_software_in_details = len(df_in_details)
+    # Import case study ids for each funder
+    df_studies_by_funder = import_xls_to_df(STUDIES_BY_FUNDER, 'Sheet1')
 
+    # Find the word (identified by the second param in the following)
+    # in different parts of the dataframe
+    cut_to_specific_word(df, 'software')
 
-
-    print('How many case studies have the word "software" in the...')
-    print('Title: ' + str(num_software_in_title))
-
-    print('Summary: ' + str(num_software_in_summary))
-
-    print('Underpinning research: ' + str(num_software_in_underpin))
-
-    print('References to the research: ' + str(num_software_in_references))
-
-    print('Details of the impact: ' + str(num_software_in_details))
-
-#    print('In sources:')
-#    print(len(df_in_sources))
-
-#    print(df.columns)
-
-    # Clean the dataframe
-#    df = clean_data(df,'Year First Provided')
-
-
-    # Write results to Excel spreadsheet for the shear hell of it
-    writer = ExcelWriter(EXCEL_RESULT_STORE)
-    df_in_title.to_excel(writer,'title')
-    df_in_summary.to_excel(writer,'summary')
-    df_in_underpin.to_excel(writer,'underpin')
-    df_in_references.to_excel(writer,'references')
-    df_in_details.to_excel(writer,'details')
-    writer.save()
 
 
 if __name__ == '__main__':
