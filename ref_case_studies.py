@@ -99,7 +99,7 @@ def main():
     # Clean data
     df = clean(df)
 
-    # Create dataframes pertaining to the workd "software" used in different bits of the case study
+    # Create dataframes pertaining to the word "software" used in different bits of the case study
     # then find how many case studies each one relates to (hence the len() bit)
     df_in_title = cut_to_software(df, 'Title')
     num_software_in_title = len(df_in_title)
@@ -118,21 +118,16 @@ def main():
 
 
 
+    print('How many case studies have the word "software" in the...')
+    print('Title: ' + str(num_software_in_title))
 
-    print('In title:')
-    print(len(df_in_title))
+    print('Summary: ' + str(num_software_in_summary))
 
-    print('In summary:')
-    print(len(df_in_summary))
+    print('Underpinning research: ' + str(num_software_in_underpin))
 
-    print('In underpinning:')
-    print(len(df_in_underpin))
+    print('References to the research: ' + str(num_software_in_references))
 
-    print('In references:')
-    print(len(df_in_references))
-
-    print('In details:')
-    print(len(df_in_details))
+    print('Details of the impact: ' + str(num_software_in_details))
 
 #    print('In sources:')
 #    print(len(df_in_sources))
