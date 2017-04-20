@@ -40,36 +40,26 @@ def read_data():
         df[current] = current
         # Use concat to add current dataframe onto end of the main dataframe 
         dataframe = pd.concat([dataframe, df])
-        
-    dataframe.sort_values(by='Case Study Id', ascending=0, inplace = True)
 
     return dataframe
+
 
 def clean(dataframe):
     """
-    Cleans the imported data for easy processing
-    :params: a dataframe
-    :return: a dataframe with clean data
+    Collapses the rows to produce a clean dataframe. There will be one only instance
+    of each Case Id and in that row there will be at least one funder identified
+    :params: a dataframe with - potentially - multiple instances of a Case Id each
+    corresponding to a funder
+    :return: a dataframe with only one instance of each Case Id
     """
 
-    # Someone thought it would be a good idea to add line breaks to the longer strings in Excel
-    # This removes them 
-    dataframe = dataframe.replace(to_replace='\n', value='', regex=True)
-
-    # There are also multiple spaces in the strings. This removes them.
-    dataframe = dataframe.replace('\s+', ' ', regex=True)
-    
-    # And now to remove the leading spaces and lowercase everything
-    # Need the try and except because some of the cols have integers
-    for col in dataframe.columns:
-        try:
-            dataframe[col] = dataframe[col].map(lambda x: x.strip())
-            dataframe[col] = dataframe[col].str.lower()
-        except:
-            pass
+    # Fill na's as blanks, because the .agg part of the function won't accept
+    # other ways of expressing na
+    dataframe = dataframe.fillna('')
+    # Collapse the rows
+    dataframe = dataframe.groupby('Case Study Id').agg(''.join)
             
     return dataframe
-
 
 
 def main():
@@ -81,15 +71,11 @@ def main():
     df = read_data()
 
     # Clean data
-#    df = clean(df)
+    df = clean(df)
 
     # Write results to Excel spreadsheet for the shear hell of it
     writer = ExcelWriter(OUTPUT)
     df.to_excel(writer,'Sheet1')
-#    df_in_summary.to_excel(writer,'summary')
-#    df_in_underpin.to_excel(writer,'underpin')
-#    df_in_references.to_excel(writer,'references')
-#    df_in_details.to_excel(writer,'details')
     writer.save()
 
 
