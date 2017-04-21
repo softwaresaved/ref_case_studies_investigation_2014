@@ -140,15 +140,21 @@ def write_results_to_xls(dataframe, loc_and_title):
     return
 
 
-def summarise_df(dataframe, funder):
+def collapse_df(dataframe, colname):
+    '''
+    Takes a dataframe and a colname, then drops all rows in that colname
+    that are NaN
+    :params: a dataframe and column from that dataframe
+    :return: a dataframe with all rows removed that have an NaN in the identified column
+    '''
 
-    dataframe = dataframe[dataframe[funder] == funder]
+    dataframe = dataframe.dropna(subset=[colname], how='all')
     number_found = len(dataframe)
 
     return number_found
 
 
-def plot_bar_charts(dataframe,filename,title,xaxis,yaxis):
+def plot_bar_from_df(dataframe,filename,title,xaxis,yaxis):
     """
     :params: 
     :return: 
@@ -165,6 +171,15 @@ def plot_bar_charts(dataframe,filename,title,xaxis,yaxis):
     plt.savefig(CHART_RESULT_STORE + filename + '.png', format = 'png', dpi = 150)
     plt.show()
     return
+
+def plot_bar_from_dict(dict):
+
+    plt.bar(range(len(dict)), dict.values(), align='center')
+    plt.xticks(range(len(dict)), list(dict.keys()))
+    plt.show()
+
+    return
+    
 
 
 def main():
@@ -221,7 +236,6 @@ def main():
     # Write super dataframe that now contains all information to an Excel spreadsheet
 #    write_results_to_xls(df, EXCEL_RESULT_STORE + 'processed_case_studies.xlsx')
 
-
     # Start getting some summary data by creating a new dataframe that contains only case studies that 
     # had the search word somewhere in them. This requires me to find the "identifying column names" which show whether
     # these terms existed or not - and this is more circuitous than one would expect. I don't want to
@@ -241,7 +255,14 @@ def main():
     df_software_anywhere = df.dropna(subset=[location_cols], how='all')
     df_software_title = df.dropna(subset=['Search word found in Title'], how='all')
     df_software_title_or_summary = df.dropna(subset=['Search word found in Title', 'Search word found in Summary of the impact'], how='all')
-    
+
+    # Start summarising how many case studies contain the search term
+    where_term_was_found = {}
+    for location in location_cols:
+        # Dropping the first part of the location for ease of plotting
+        name = location[21:]
+        where_term_was_found[name] = collapse_df(df_software_anywhere, location)
+
     funder_all_studies = {}
     funder_software_anywhere = {}
     funder_software_title = {}
@@ -249,17 +270,14 @@ def main():
     # Go through all the funders
     for funder in list_of_funders:
         # Creat dict showing how many case studies registered by each funder
-        funder_all_studies[funder] = summarise_df(df, funder)
+        funder_all_studies[funder] = collapse_df(df, funder)
         # Creat dicts showing how many case studies included the search word anywhere, just in title
         # just in title or summary by each funder
-        funder_software_anywhere[funder] = summarise_df(df_software_anywhere, funder)
-        funder_software_title[funder] = summarise_df(df_software_title, funder)
-        funder_software_title_or_summary[funder] = summarise_df(df_software_title_or_summary, funder)
-        
-    print(funder_all_studies)
-    print(funder_software_anywhere)
-    print(funder_software_title)
-    print(funder_software_title_or_summary)
+        funder_software_anywhere[funder] = collapse_df(df_software_anywhere, funder)
+        funder_software_title[funder] = collapse_df(df_software_title, funder)
+        funder_software_title_or_summary[funder] = collapse_df(df_software_title_or_summary, funder)
+    
+#    plot_bar_from_dict(where_term_was_found)
 
 
 if __name__ == '__main__':
