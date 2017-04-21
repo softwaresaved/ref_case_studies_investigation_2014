@@ -48,8 +48,7 @@ def clean(dataframe):
     return dataframe
 
 
-
-def cut_to_specific_word(dataframe, specific_word):
+def cut_to_specific_word(dataframe, specific_word, where_to_look):
     """
     Takes in a dataframe and a column, and then creates a new dataframe containing only
     the rows from the original dataframe that had the word "software" in that column
@@ -58,10 +57,6 @@ def cut_to_specific_word(dataframe, specific_word):
     Title, Summary, etc. to Excel spreadsheets
     """
 
-    # A list of the different parts of the case study (i.e. columns) in which
-    # we want to look
-    where_to_look = ['Title', 'Summary of the impact', 'Underpinning research', 'References to the research', 'Details of the impact']
-
     # Initialise dict in which to store number of instances of specific_word found
     how_many = {}
 
@@ -69,27 +64,79 @@ def cut_to_specific_word(dataframe, specific_word):
 
     # Go through list, look for the word software
     for current in where_to_look:
+        # Cut dataframe down to only those rows with a word in the right column
         current_df = dataframe[dataframe[current].str.contains(specific_word)]
-        # Store number of instances in dict
-        how_many[current] = len(current_df)
-        print(current + ": " + str(how_many[current]))
+        # Add a new col to indicate where the specific word was found
+        current_df[current] = current
+        # Drop all columns except the case study
+        current_df = current_df['Case Study Id', current]
+        
+        dataframe = pd.merge(left=dataframe,right=current_df, how='left', left_on='Case Study Id', right_on='Case Study Id')
+
+    print(dataframe)
+
+
+
+#        # Store number of instances in dict
+#        how_many[current] = len(current_df)
+#        print(current + ": " + str(how_many[current]))
         # Get ready to write to Excel
-        writer = ExcelWriter(EXCEL_RESULT_STORE + str(current) + '.xlsx')
-        # Write result to Excel
-        current_df.to_excel(writer, 'Sheet1')
-        # Close Excel writer
-        writer.save()
+
+
+#    writer = ExcelWriter(EXCEL_RESULT_STORE + str(current) + '.xlsx')
+    # Write result to Excel
+#    current_df.to_excel(writer, 'Sheet1')
+    # Close Excel writer
+#    writer.save()
+
+
+#    # Go through list, look for the word software
+#    for current in where_to_look:
+#        current_df = dataframe[dataframe[current].str.contains(specific_word)]
+#        # Store number of instances in dict
+#        how_many[current] = len(current_df)
+#        print(current + ": " + str(how_many[current]))
+#        # Get ready to write to Excel
+#        writer = ExcelWriter(EXCEL_RESULT_STORE + str(current) + '.xlsx')
+#        # Write result to Excel
+#        current_df.to_excel(writer, 'Sheet1')
+#        # Close Excel writer
+#        writer.save()
+
+
+
+
 
     # Convert the list of how many instances to a dataframe,
     # reorder the columns for prettiness and then write
     # it to an Excel spreadsheet
-    how_many_df = pd.DataFrame(how_many, index = [0])
-    how_many_df = how_many_df[where_to_look]
+#    how_many_df = pd.DataFrame(how_many, index = [0])
+#    how_many_df = how_many_df[where_to_look]
     
-    writer = ExcelWriter(EXCEL_RESULT_STORE + 'how_many_time_' + specific_word + '_was_found_in_case_studies.xlsx')
-    how_many_df.to_excel(writer,'Sheet1', index=False)
-    writer.save()
+#    writer = ExcelWriter(EXCEL_RESULT_STORE + 'how_many_time_' + specific_word + '_was_found_in_case_studies.xlsx')
+#    how_many_df.to_excel(writer,'Sheet1', index=False)
+#    writer.save()
 
+    return
+
+
+def associate_funder(df_studies_by_funder, where_to_look):
+    
+#    for current in where_to_look:
+#        df_current = import_xls_to_df(EXCEL_RESULT_STORE + str(current) + '.xlsx', 'Sheet1')
+#        print(df_current)
+    
+    df_current = import_xls_to_df(EXCEL_RESULT_STORE + 'Title.xlsx', 'Sheet1')
+    
+    df = pd.merge(left=df_current,right=df_studies_by_funder, how='left', left_on='Case Study Id', right_on='Case Study Id')
+    
+    writer = ExcelWriter(EXCEL_RESULT_STORE + 'Title.xlsx')
+    # Write result to Excel
+    df.to_excel(writer, 'Sheet1')
+    # Close Excel writer
+    writer.save()
+    
+        
     return
 
 
@@ -127,16 +174,20 @@ def main():
 
     # Clean data
     df = clean(df)
-    
+
     # Import case study ids for each funder
     df_studies_by_funder = import_xls_to_df(STUDIES_BY_FUNDER, 'Sheet1')
 
+    # A list of the different parts of the case study (i.e. columns) in which
+    # we want to look
+    where_to_look = ['Title', 'Summary of the impact', 'Underpinning research', 'References to the research', 'Details of the impact']
+
     # Find the word (identified by the second param in the following)
     # in different parts of the dataframe
-    cut_to_specific_word(df, 'software')
+    cut_to_specific_word(df, 'software', where_to_look)
     
-    # Find 
-
+    # Add information about which case studies correspond to which funder
+#    associate_funder(df_studies_by_funder, where_to_look)
 
 
 if __name__ == '__main__':
