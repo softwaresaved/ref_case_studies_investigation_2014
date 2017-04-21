@@ -182,6 +182,9 @@ def main():
     # Clean data
     df = clean(df)
 
+    #Need this list for later to remove columns relating to original data
+    original_cols = list(df.columns)
+
     # Import case study ids for each funder
     df_studies_by_funder = import_xls_to_df(STUDIES_BY_FUNDER, 'Sheet1')
 
@@ -219,12 +222,44 @@ def main():
 #    write_results_to_xls(df, EXCEL_RESULT_STORE + 'processed_case_studies.xlsx')
 
 
-    # Get summary of funder information
+    # Start getting some summary data by creating a new dataframe that contains only case studies that 
+    # had the search word somewhere in them. This requires me to find the "identifying column names" which show whether
+    # these terms existed or not - and this is more circuitous than one would expect. I don't want to
+    # rely on hard-wiring these col names into the code, so I'm going to take the list of all cols, remove from them
+    # the cols known not to relate to idenfication to leave the cols I want... phew!
+    
+    # Get all names in the current super dataframe
+    all_col_names = list(df.columns)
+    # Subtract the oriinal colnames
+    temp_list = [x for x in all_col_names if x not in original_cols]
+    # Remove the funder columns to produce the cols with locating data in them
+    location_cols = [x for x in temp_list if x not in list_of_funders]
 
-    funder_summary = {}
+    # Make new dataframes corresponding to case studies that mention the word
+    # anywhere or just those that mention it in the title, or those that mention
+    # it just in the title or summary of impact
+    df_software_anywhere = df.dropna(subset=[location_cols], how='all')
+    df_software_title = df.dropna(subset=['Search word found in Title'], how='all')
+    df_software_title_or_summary = df.dropna(subset=['Search word found in Title', 'Search word found in Summary of the impact'], how='all')
+    
+    funder_all_studies = {}
+    funder_software_anywhere = {}
+    funder_software_title = {}
+    funder_software_title_or_summary = {}
+    # Go through all the funders
     for funder in list_of_funders:
-        funder_summary[funder] = summarise_df(df, funder)
-    print(funder_summary)
+        # Creat dict showing how many case studies registered by each funder
+        funder_all_studies[funder] = summarise_df(df, funder)
+        # Creat dicts showing how many case studies included the search word anywhere, just in title
+        # just in title or summary by each funder
+        funder_software_anywhere[funder] = summarise_df(df_software_anywhere, funder)
+        funder_software_title[funder] = summarise_df(df_software_title, funder)
+        funder_software_title_or_summary[funder] = summarise_df(df_software_title_or_summary, funder)
+        
+    print(funder_all_studies)
+    print(funder_software_anywhere)
+    print(funder_software_title)
+    print(funder_software_title_or_summary)
 
 
 if __name__ == '__main__':
