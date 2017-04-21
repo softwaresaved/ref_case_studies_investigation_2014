@@ -75,34 +75,6 @@ def merge_search_place(dataframe, df_cut):
     return dataframe
 
 
-
-#        # Store number of instances in dict
-#        how_many[current] = len(current_df)
-#        print(current + ": " + str(how_many[current]))
-        # Get ready to write to Excel
-
-
-#    writer = ExcelWriter(EXCEL_RESULT_STORE + str(current) + '.xlsx')
-    # Write result to Excel
-#    current_df.to_excel(writer, 'Sheet1')
-    # Close Excel writer
-#    writer.save()
-
-
-#    # Go through list, look for the word software
-#    for current in where_to_look:
-#        current_df = dataframe[dataframe[current].str.contains(specific_word)]
-#        # Store number of instances in dict
-#        how_many[current] = len(current_df)
-#        print(current + ": " + str(how_many[current]))
-#        # Get ready to write to Excel
-#        writer = ExcelWriter(EXCEL_RESULT_STORE + str(current) + '.xlsx')
-#        # Write result to Excel
-#        current_df.to_excel(writer, 'Sheet1')
-#        # Close Excel writer
-#        writer.save()
-
-
 def write_lengths(how_many_found, possible_search_places):
 
     # Convert the dictionary of how many times the word was found
