@@ -48,7 +48,7 @@ def clean(dataframe):
     return dataframe
 
 
-def cut_to_specific_word(dataframe, specific_word, where_to_look):
+def cut_to_specific_word(dataframe, specific_word, part_in_bid):
     """
     Takes in a dataframe and a column, and then creates a new dataframe containing only
     the rows from the original dataframe that had the word "software" in that column
@@ -57,23 +57,22 @@ def cut_to_specific_word(dataframe, specific_word, where_to_look):
     Title, Summary, etc. to Excel spreadsheets
     """
 
-    # Initialise dict in which to store number of instances of specific_word found
-    how_many = {}
+    # Cut dataframe down to only those rows with a word in the right column
+    current_df = dataframe[dataframe[part_in_bid].str.contains(specific_word)]
+    # Add a new col to indicate where the specific word was found
+    new_col_name = 'Found in ' + part_in_bid
+    current_df[new_col_name] = part_in_bid
+    # Drop all columns except the case study and the col showing where the word was found
+    current_df = current_df[['Case Study Id', new_col_name]]
 
-    print('How many case studies have the word "software" in the...')    
+    return current_df
 
-    # Go through list, look for the word software
-    for current in where_to_look:
-        # Cut dataframe down to only those rows with a word in the right column
-        current_df = dataframe[dataframe[current].str.contains(specific_word)]
-        # Add a new col to indicate where the specific word was found
-        current_df[current] = current
-        # Drop all columns except the case study
-        current_df = current_df['Case Study Id', current]
-        
-        dataframe = pd.merge(left=dataframe,right=current_df, how='left', left_on='Case Study Id', right_on='Case Study Id')
 
-    print(dataframe)
+def merge_search_place(dataframe, df_cut):
+
+    dataframe = pd.merge(left=dataframe,right=df_cut, how='left', left_on='Case Study Id', right_on='Case Study Id')
+
+    return dataframe
 
 
 
@@ -104,18 +103,17 @@ def cut_to_specific_word(dataframe, specific_word, where_to_look):
 #        writer.save()
 
 
+def write_lengths(how_many_found, possible_search_places):
 
-
-
-    # Convert the list of how many instances to a dataframe,
-    # reorder the columns for prettiness and then write
-    # it to an Excel spreadsheet
-#    how_many_df = pd.DataFrame(how_many, index = [0])
-#    how_many_df = how_many_df[where_to_look]
+    # Convert the dictionary of how many times the word was found
+    # to a dataframe, reorder the columns for prettiness and then write
+    # it to an Excel spreadsheet    
+    how_many_df = pd.DataFrame(how_many_found, index = [0])
+    how_many_df = how_many_df[possible_search_places]
     
-#    writer = ExcelWriter(EXCEL_RESULT_STORE + 'how_many_time_' + specific_word + '_was_found_in_case_studies.xlsx')
-#    how_many_df.to_excel(writer,'Sheet1', index=False)
-#    writer.save()
+    writer = ExcelWriter(EXCEL_RESULT_STORE + 'how_many_times_word_was_found.xlsx')
+    how_many_df.to_excel(writer,'Sheet1', index=False)
+    writer.save()
 
     return
 
@@ -168,7 +166,10 @@ def main():
     """
     Main function to run program
     """
-    
+
+    # The word we're going to look for - in lowercase please
+    WORD_TO_SEARCH_FOR = 'software'
+
     # Import dataframe from original xls
     df = import_xls_to_df(DATAFILENAME, 'CaseStudies')
 
@@ -180,12 +181,26 @@ def main():
 
     # A list of the different parts of the case study (i.e. columns) in which
     # we want to look
-    where_to_look = ['Title', 'Summary of the impact', 'Underpinning research', 'References to the research', 'Details of the impact']
+    possible_search_places = ['Title', 'Summary of the impact', 'Underpinning research', 'References to the research', 'Details of the impact']
 
-    # Find the word (identified by the second param in the following)
-    # in different parts of the dataframe
-    cut_to_specific_word(df, 'software', where_to_look)
+    # Initialise dict in which to store number of instances of specific_word found
+    how_many_found = {}
+
+    # Go through the parts of the bid, and for each one look for the search word, record how
+    # case studies were found to match, then add a new column to identify this location
+    # in the original dataframe
+    for part_in_bid in possible_search_places:
+        # Find the word (identified by the second param in the following)
+        # in different parts of the dataframe
+        df_cut = cut_to_specific_word(df, WORD_TO_SEARCH_FOR, part_in_bid)
+        how_many_found[part_in_bid] = len(df_cut)
+        df = merge_search_place(df, df_cut)
     
+    # Write the times the word was found to Excel for posterity
+    write_lengths(how_many_found, possible_search_places)
+        
+    print(df)
+
     # Add information about which case studies correspond to which funder
 #    associate_funder(df_studies_by_funder, where_to_look)
 
