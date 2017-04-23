@@ -290,6 +290,7 @@ def main():
 
     ########### Time for some plotting ################
     
+    # For ease of plotting, convert the dicts into dataframes, name them, sort by ascending and add eprcentage column
     df_how_many_found = convert_to_df(how_many_found, True, 'Where word was found', 'How many times "' + WORD_TO_SEARCH_FOR + '" was found in case studies')
     df_funder_all_studies = convert_to_df(funder_all_studies, True, 'Funder', 'Number of case studies')
     df_funder_software_anywhere = convert_to_df(funder_software_anywhere, True, 'Funder', 'Number with "' + WORD_TO_SEARCH_FOR + '" anywhere in case study')
