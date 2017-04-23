@@ -122,6 +122,17 @@ def associate_funders(dataframe, df_studies_by_funder):
         
     return dataframe
 
+def get_col_names(df, cols_to_remove_1, cols_to_remove_2):
+
+    # Get all names in the dataframe
+    all_col_names = list(df.columns)
+    # Remove the first list of col names
+    temp_list = [x for x in all_col_names if x not in cols_to_remove_1]
+    # Remove the second list of col names
+    remaining_cols = [x for x in temp_list if x not in cols_to_remove_2]
+    
+    return remaining_cols
+
 
 def write_results_to_xls(dataframe, loc_and_title):
     """
@@ -154,6 +165,21 @@ def collapse_df(dataframe, colname):
     return number_found
 
 
+def convert_to_df(dict, add_percent, index_name, value_name):
+
+
+    dataframe = pd.DataFrame(list(dict.items()), columns=[index_name, value_name])
+    dataframe.set_index([index_name], inplace=True)
+    dataframe.sort_values([value_name], inplace=True)
+
+    if add_percent == True:
+        dataframe['percentage']= round(100 * (dataframe[value_name]/dataframe[value_name].sum()),1)
+
+    print(dataframe)
+
+    return
+
+
 def plot_bar_from_df(dataframe,filename,title,xaxis,yaxis):
     """
     :params: 
@@ -181,7 +207,6 @@ def plot_bar_from_dict(dict):
     return
     
 
-
 def main():
     """
     Main function to run program
@@ -190,6 +215,10 @@ def main():
     change the global variable found at the very start of
     the program called WORD_TO_SEARCH_FOR
     """
+    
+    # A list of the different parts of the case study (i.e. columns) in which
+    # we want to look
+    possible_search_places = ['Title', 'Summary of the impact', 'Underpinning research', 'References to the research', 'Details of the impact']
 
     # Import dataframe from original xls
     df = import_xls_to_df(DATAFILENAME, 'CaseStudies')
@@ -197,29 +226,22 @@ def main():
     # Clean data
     df = clean(df)
 
-    #Need this list for later to remove columns relating to original data
+    #Need this list later: used to remove columns relating to original data
     original_cols = list(df.columns)
 
     # Import case study ids for each funder
     df_studies_by_funder = import_xls_to_df(STUDIES_BY_FUNDER, 'Sheet1')
 
-    # Create a list of the funders that is available
+    # Create a list of the available funders.
     # Easily done by taking the col names of df_studies_by_funder
-    # and removing the Case Study Id item 
+    # and removing the Case Study Id item
     list_of_funders = list(df_studies_by_funder.columns)
     list_of_funders.remove('Case Study Id')
-    print(list_of_funders)
-
-    # A list of the different parts of the case study (i.e. columns) in which
-    # we want to look
-    possible_search_places = ['Title', 'Summary of the impact', 'Underpinning research', 'References to the research', 'Details of the impact']
-
-    # Initialise dict in which to store number of instances of specific_word found
-    how_many_found = {}
 
     # Go through the parts of the bid, and for each one look for the search word, record how
-    # case studies were found to match, then add a new column to identify this location
+    # many case studies were found to match, then add a new column to identify this location
     # in the original dataframe
+    how_many_found = {}
     for part_in_bid in possible_search_places:
         # Find the word (identified by the second param in the following)
         # in different parts of the dataframe
@@ -227,6 +249,9 @@ def main():
         how_many_found[part_in_bid] = len(df_cut)
         df = merge_search_place(df, df_cut)
     
+    ########## This next bit saves the number of times the term was found
+    ########## in each part of the case study
+
     # Write the times the word was found to Excel for posterity
     write_lengths(how_many_found, possible_search_places)
 
@@ -236,46 +261,41 @@ def main():
     # Write super dataframe that now contains all information to an Excel spreadsheet
 #    write_results_to_xls(df, EXCEL_RESULT_STORE + 'processed_case_studies.xlsx')
 
-    # Start getting some summary data by creating a new dataframe that contains only case studies that 
-    # had the search word somewhere in them. This requires me to find the "identifying column names" which show whether
-    # these terms existed or not - and this is more circuitous than one would expect. I don't want to
-    # rely on hard-wiring these col names into the code, so I'm going to take the list of all cols, remove from them
-    # the cols known not to relate to idenfication to leave the cols I want... phew!
-    
-    # Get all names in the current super dataframe
-    all_col_names = list(df.columns)
-    # Subtract the oriinal colnames
-    temp_list = [x for x in all_col_names if x not in original_cols]
-    # Remove the funder columns to produce the cols with locating data in them
-    location_cols = [x for x in temp_list if x not in list_of_funders]
+    ########## Now to start getting some data about funders ########## 
+
+    # Remove all col names except those relating to those that identify where
+    # the word was found (i.e. "Found in Title, Found in...")
+    location_cols = get_col_names(df, original_cols, list_of_funders)
 
     # Make new dataframes corresponding to case studies that mention the word
     # anywhere or just those that mention it in the title, or those that mention
     # it just in the title or summary of impact
     df_software_anywhere = df.dropna(subset=[location_cols], how='all')
     df_software_title = df.dropna(subset=['Search word found in Title'], how='all')
-    df_software_title_or_summary = df.dropna(subset=['Search word found in Title', 'Search word found in Summary of the impact'], how='all')
+    df_software_summary = df.dropna(subset=['Search word found in Summary of the impact'], how='all')
 
-    # Start summarising how many case studies contain the search term
-    where_term_was_found = {}
-    for location in location_cols:
-        # Dropping the first part of the location for ease of plotting
-        name = location[21:]
-        where_term_was_found[name] = collapse_df(df_software_anywhere, location)
-
+    # Go through all the funders to see how many case studies come from each one
     funder_all_studies = {}
     funder_software_anywhere = {}
     funder_software_title = {}
-    funder_software_title_or_summary = {}
-    # Go through all the funders
+    funder_software_summary = {}
     for funder in list_of_funders:
-        # Creat dict showing how many case studies registered by each funder
+        # Creat dict showing how many case studies - of any type - registered by each funder
         funder_all_studies[funder] = collapse_df(df, funder)
-        # Creat dicts showing how many case studies included the search word anywhere, just in title
-        # just in title or summary by each funder
+        # Creat dicts for each funder showing how many case studies included the search word
+        # 1. anywhere, 2. just in title, 3. just in the title or summary
         funder_software_anywhere[funder] = collapse_df(df_software_anywhere, funder)
         funder_software_title[funder] = collapse_df(df_software_title, funder)
-        funder_software_title_or_summary[funder] = collapse_df(df_software_title_or_summary, funder)
+        funder_software_summary[funder] = collapse_df(df_software_summary, funder)
+
+    ########### Time for some plotting ################
+    
+    df_how_many_found = convert_to_df(how_many_found, True, 'Where word was found', 'How many times "' + WORD_TO_SEARCH_FOR + '" was found in case studies')
+    df_funder_all_studies = convert_to_df(funder_all_studies, True, 'Funder', 'Number of case studies')
+    df_funder_software_anywhere = convert_to_df(funder_software_anywhere, True, 'Funder', 'Number with "' + WORD_TO_SEARCH_FOR + '" anywhere in case study')
+    df_funder_software_title = convert_to_df(funder_software_title, True, 'Funder', 'Number with "' + WORD_TO_SEARCH_FOR + '" in title')
+    df_funder_software_summary = convert_to_df(funder_software_summary, True, 'Funder', 'Number with "' + WORD_TO_SEARCH_FOR + '" in summary')
+
     
 #    plot_bar_from_dict(where_term_was_found)
 
