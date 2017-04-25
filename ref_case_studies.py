@@ -165,47 +165,41 @@ def collapse_df(dataframe, colname):
     return number_found
 
 
-def convert_to_df(dict, add_percent, index_name, value_name):
-
+def convert_to_df(dict, index_name, value_name):
 
     dataframe = pd.DataFrame(list(dict.items()), columns=[index_name, value_name])
     dataframe.set_index([index_name], inplace=True)
     dataframe.sort_values([value_name], inplace=True)
 
-    if add_percent == True:
-        dataframe['percentage']= round(100 * (dataframe[value_name]/dataframe[value_name].sum()),1)
-
-    print(dataframe)
-
-    return
+    return dataframe
 
 
-def plot_bar_from_df(dataframe,filename,title,xaxis,yaxis):
+def add_percent_relative_to_self(dataframe, colname):
+
+    dataframe['percentage'] = round(100 * (dataframe[colname]/dataframe[colname].sum()),1)
+    print('here')
+
+    return dataframe
+
+
+def plot_bar_from_df(dataframe, y_col, title):
     """
     :params: 
     :return: 
     """
 
-    dataframe.plot(kind='bar', legend=None)
+    dataframe.plot(y = y_col, kind='bar', legend=None)
     plt.title(title)
-    if xaxis != None:
-        plt.xlabel(xaxis)
-    if yaxis != None:
-        plt.ylabel(yaxis)
+#    if xaxis != None:
+#        plt.xlabel(xaxis)
+#    if yaxis != None:
+#        plt.ylabel(yaxis)
     # This provides more space around the chart to make it prettier        
     plt.tight_layout(True)
-    plt.savefig(CHART_RESULT_STORE + filename + '.png', format = 'png', dpi = 150)
+#    plt.savefig(CHART_RESULT_STORE + filename + '.png', format = 'png', dpi = 150)
     plt.show()
     return
 
-def plot_bar_from_dict(dict):
-
-    plt.bar(range(len(dict)), dict.values(), align='center')
-    plt.xticks(range(len(dict)), list(dict.keys()))
-    plt.show()
-
-    return
-    
 
 def main():
     """
@@ -288,17 +282,25 @@ def main():
         funder_software_title[funder] = collapse_df(df_software_title, funder)
         funder_software_summary[funder] = collapse_df(df_software_summary, funder)
 
-    ########### Time for some plotting ################
-    
-    # For ease of plotting, convert the dicts into dataframes, name them, sort by ascending and add eprcentage column
-    df_how_many_found = convert_to_df(how_many_found, True, 'Where word was found', 'How many times "' + WORD_TO_SEARCH_FOR + '" was found in case studies')
-    df_funder_all_studies = convert_to_df(funder_all_studies, True, 'Funder', 'Number of case studies')
-    df_funder_software_anywhere = convert_to_df(funder_software_anywhere, True, 'Funder', 'Number with "' + WORD_TO_SEARCH_FOR + '" anywhere in case study')
-    df_funder_software_title = convert_to_df(funder_software_title, True, 'Funder', 'Number with "' + WORD_TO_SEARCH_FOR + '" in title')
-    df_funder_software_summary = convert_to_df(funder_software_summary, True, 'Funder', 'Number with "' + WORD_TO_SEARCH_FOR + '" in summary')
+    ########### What values do we want to print? ################
 
+   #list = [dict name, name of measurement, value of measurement, title of chart]
+    list1 = [how_many_found, 'Where', 'Times word found', 'Where "' + WORD_TO_SEARCH_FOR + '" was found in case study']
+    list2 = [funder_all_studies, 'Funder', 'Number of case studies', 'Number of REF case studies registered by funder']
+    list3 = [funder_software_anywhere, 'Funder', 'Times word found anywhere', 'Number of REF case studies mentioning"'
+            + WORD_TO_SEARCH_FOR + '" anywhere in the case study']
+    list4 = [funder_software_title, 'Funder', 'Times word found in title', 'Number of REF case studies mentioning"'
+            + WORD_TO_SEARCH_FOR + '" in the title']
+    list5 = [funder_software_summary, 'Funder', 'Times word found in summary','Number of REF case studies mentioning"'
+            + WORD_TO_SEARCH_FOR + '" in the summary']
     
-#    plot_bar_from_dict(where_term_was_found)
+    things_to_plot = [list1, list2, list3, list4, list5]
+
+    for count in range(0,len(things_to_plot)):
+        df_current = convert_to_df(things_to_plot[count][0],things_to_plot[count][1], things_to_plot[count][2])
+        df_current = add_percent_relative_to_self(df_current, things_to_plot[count][2])
+        plot_bar_from_df(df_current, things_to_plot[count][2], things_to_plot[count][3])
+        print(df_current)
 
 
 if __name__ == '__main__':
