@@ -174,10 +174,16 @@ def convert_to_df(dict, index_name, value_name):
     return dataframe
 
 
-def add_percent_relative_to_self(dataframe, colname):
+def add_percent(dataframe, colname):
 
     dataframe['percentage'] = round(100 * (dataframe[colname]/dataframe[colname].sum()),1)
-    print('here')
+
+    return dataframe
+
+
+def add_relative_percentage(dataframe, col_for_calc, df_master_values, col_for_relative):
+
+    dataframe['relative percentage'] = round(100 * (dataframe[col_for_calc]/df_master_values[col_for_relative]),1)    
 
     return dataframe
 
@@ -198,6 +204,7 @@ def plot_bar_from_df(dataframe, y_col, title):
     plt.tight_layout(True)
 #    plt.savefig(CHART_RESULT_STORE + filename + '.png', format = 'png', dpi = 150)
     plt.show()
+    
     return
 
 
@@ -285,23 +292,31 @@ def main():
     ########### What values do we want to print? ################
 
    #list = [dict name, name of measurement, value of measurement, title of chart]
-    list1 = [how_many_found, 'Where', 'Times word found', 'Where "' + WORD_TO_SEARCH_FOR + '" was found in case study']
-    list2 = [funder_all_studies, 'Funder', 'Number of case studies', 'Number of REF case studies registered by funder']
-    list3 = [funder_software_anywhere, 'Funder', 'Times word found anywhere', 'Number of REF case studies mentioning"'
+    master_values = [funder_all_studies, 'Funder', 'Number of case studies', 'Number of REF case studies registered by funder']
+    calc1 = [how_many_found, 'Where', 'Times word found', 'Where "' + WORD_TO_SEARCH_FOR + '" was found in case study']
+    calc2 = [funder_software_anywhere, 'Funder', 'Times word found anywhere', 'Number of REF case studies mentioning"'
             + WORD_TO_SEARCH_FOR + '" anywhere in the case study']
-    list4 = [funder_software_title, 'Funder', 'Times word found in title', 'Number of REF case studies mentioning"'
+    calc3 = [funder_software_title, 'Funder', 'Times word found in title', 'Number of REF case studies mentioning"'
             + WORD_TO_SEARCH_FOR + '" in the title']
-    list5 = [funder_software_summary, 'Funder', 'Times word found in summary','Number of REF case studies mentioning"'
+    calc4 = [funder_software_summary, 'Funder', 'Times word found in summary','Number of REF case studies mentioning"'
             + WORD_TO_SEARCH_FOR + '" in the summary']
     
-    things_to_plot = [list1, list2, list3, list4, list5]
+    things_to_plot = [calc1, calc2, calc3, calc4]
+    things_to_add_relative_percentage = [calc2, calc3, calc4]
+
+    df_master_values = convert_to_df(master_values[0],master_values[1], master_values[2])
+    df_master_values = add_percent(df_master_values, master_values[2])
+    plot_bar_from_df(df_master_values, master_values[2], master_values[3])
 
     for count in range(0,len(things_to_plot)):
         df_current = convert_to_df(things_to_plot[count][0],things_to_plot[count][1], things_to_plot[count][2])
-        df_current = add_percent_relative_to_self(df_current, things_to_plot[count][2])
-        plot_bar_from_df(df_current, things_to_plot[count][2], things_to_plot[count][3])
-        print(df_current)
-
+        df_current = add_percent(df_current, things_to_plot[count][2])
+#        plot_bar_from_df(df_current, things_to_plot[count][2], things_to_plot[count][3])
+        for count2 in range(0,len(things_to_add_relative_percentage)):
+            if things_to_plot[count] == things_to_add_relative_percentage[count2]:
+                df_current = add_relative_percentage(df_current, things_to_plot[count][2], df_master_values, master_values[2])
+                plot_bar_from_df(df_current, 'relative percentage', 'Case studies relative to funder')
+                print(df_current)
 
 if __name__ == '__main__':
     main()
