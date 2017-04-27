@@ -12,6 +12,7 @@ import math
 WORD_TO_SEARCH_FOR = 'software'
 DATAFILENAME = "./data/CaseStudies.xlsx"
 STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.xlsx"
+STUDIES_BY_DISCIPLINE = "./data/list_of_studies_by_discipline.xlsx"
 EXCEL_RESULT_STORE = "./outputs/"
 CHART_RESULT_STORE = "./outputs/charts/"
 
@@ -64,7 +65,7 @@ def cut_to_specific_word(dataframe, specific_word, part_in_bid):
     # Cut dataframe down to only those rows with a word in the right column
     current_df = dataframe[dataframe[part_in_bid].str.contains(specific_word)]
     # Add a new col to indicate where the specific word was found
-    new_col_name = 'Search word found in ' + part_in_bid
+    new_col_name = 'Word found in ' + part_in_bid
     current_df[new_col_name] = part_in_bid
     # Drop all columns except the case study and the col showing where the word was found
     current_df = current_df[['Case Study Id', new_col_name]]
@@ -110,12 +111,12 @@ def write_lengths(how_many_found, possible_search_places):
     return
 
 
-def associate_funders(dataframe, df_studies_by_funder):
+def associate_new_data(dataframe, df_studies_by_funder):
     """
     Takes a dataframe with the case study information and merges it with another
-    dataframe that contains case study IDs and who funded them
-    :params: a dataframe with case study information, a second dataframe with cases study IDs and funder information
-    :return: a dataframe containing case study information and funder information
+    dataframe that contains case study IDs and some other data (e.g. funders, disciplines)
+    :params: a dataframe with case study information, a second dataframe with cases study IDs and other information
+    :return: a dataframe containing case study information and other information
     """
     
     dataframe = pd.merge(left=dataframe,right=df_studies_by_funder, how='left', left_on='Case Study Id', right_on='Case Study Id')
@@ -218,7 +219,7 @@ def main():
     """
     
     # A list of the different parts of the case study (i.e. columns) in which
-    # we want to look
+    # we want to search
     possible_search_places = ['Title', 'Summary of the impact', 'Underpinning research', 'References to the research', 'Details of the impact']
 
     # Import dataframe from original xls
@@ -232,6 +233,17 @@ def main():
 
     # Import case study ids for each funder
     df_studies_by_funder = import_xls_to_df(STUDIES_BY_FUNDER, 'Sheet1')
+    
+    # Import case study ids for each funder
+    df_studies_by_discipline = import_xls_to_df(STUDIES_BY_DISCIPLINE, 'Sheet1')
+    
+    # Associate case study IDs with specific funders
+    df = associate_new_data(df, df_studies_by_funder)
+
+    # Associate case study IDs with specific disciplines
+    df = associate_new_data(df, df_studies_by_discipline)
+    
+    
 
     # Create a list of the available funders.
     # Easily done by taking the col names of df_studies_by_funder
@@ -242,25 +254,27 @@ def main():
     # Go through the parts of the bid, and for each one look for the search word, record how
     # many case studies were found to match, then add a new column to identify this location
     # in the original dataframe
-    how_many_found = {}
+#    how_many_found = {}
     for part_in_bid in possible_search_places:
         # Find the word (identified by the second param in the following)
         # in different parts of the dataframe
         df_cut = cut_to_specific_word(df, WORD_TO_SEARCH_FOR, part_in_bid)
-        how_many_found[part_in_bid] = len(df_cut)
+#        how_many_found[part_in_bid] = len(df_cut)
         df = merge_search_place(df, df_cut)
+
+    # For ease of calculation later, create a new column which is a summary of the
+    # other location 
+    df.loc[df[['Word found in Title',
+               'Word found in Summary of the impact',
+               'Word found in Underpinning research',
+               'Word found in References to the research',
+               'Word found in Details of the impact'
+               ]].notnull().any(1), 'Word found in anywhere'] = 'anywhere'
+
     
-    ########## This next bit saves the number of times the term was found
-    ########## in each part of the case study
 
-    # Write the times the word was found to Excel for posterity
-    write_lengths(how_many_found, possible_search_places)
 
-    # Associate case study IDs with specific funders
-    df = associate_funders(df, df_studies_by_funder)
 
-    # Write super dataframe that now contains all information to an Excel spreadsheet
-#    write_results_to_xls(df, EXCEL_RESULT_STORE + 'processed_case_studies.xlsx')
 
     ########## Now to start getting some data about funders ########## 
 
@@ -271,9 +285,9 @@ def main():
     # Make new dataframes corresponding to case studies that mention the word
     # anywhere or just those that mention it in the title, or those that mention
     # it just in the title or summary of impact
-    df_software_anywhere = df.dropna(subset=[location_cols], how='all')
-    df_software_title = df.dropna(subset=['Search word found in Title'], how='all')
-    df_software_summary = df.dropna(subset=['Search word found in Summary of the impact'], how='all')
+#    df_software_anywhere = df.dropna(subset=[location_cols], how='all')
+#    df_software_title = df.dropna(subset=['Search word found in Title'], how='all')
+#    df_software_summary = df.dropna(subset=['Search word found in Summary of the impact'], how='all')
 
 
 '''''
