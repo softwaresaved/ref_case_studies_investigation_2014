@@ -260,7 +260,6 @@ def main():
         df_cut = cut_to_specific_word(df, WORD_TO_SEARCH_FOR, part_in_bid)
         df = merge_search_place(df, df_cut)
 
-
     # Create some names that will be used to represent strings that are used
     # to identify columns in the analysis
     found_in = 'found_in_'
@@ -278,6 +277,11 @@ def main():
     # this to the list
     found_in_cols.append('found_in_anywhere')
 
+    # Create a new dataframe that only contains case studies that include
+    # the search term in them somewhere
+    df_software = df.dropna(subset=['found_in_anywhere'], how='all')
+    print(df_software)
+
     # Create a list of the cols that hold discipline data in them
     discipline_cols = col_locator(df, discipline)
 
@@ -290,34 +294,28 @@ def main():
     all_locator_cols = found_in_cols + discipline_cols + funder_cols
     dict_of_dfs = {}
     
+    # Drop all columns that aren't related to the found_in, funder
+    # or discipline in which we're interested, and store them in
+    # a dict of dataframes for later processing
     for name in all_locator_cols:
         dict_of_dfs[name] = df.dropna(subset=[name], how='all')
 
+    # Create summaries of the data based on where the term was found,
+    # in which discipline it was basde, and by who funded it
     df_summary_found_in = summarise_dfs(dict_of_dfs, found_in_cols, found_in)
     df_summary_discipline = summarise_dfs(dict_of_dfs, discipline_cols, discipline)
     df_summary_funder = summarise_dfs(dict_of_dfs, funder_cols, funder)
 
-'''''
-    # Make new dataframes corresponding to case studies that mention the word
-    # anywhere or just those that mention it in the title, or those that mention
-    # it just in the title or summary of impact
-#    df_software_anywhere = df.dropna(subset=[location_cols], how='all')
-#    df_software_title = df.dropna(subset=['Search word found in Title'], how='all')
-#    df_software_summary = df.dropna(subset=['Search word found in Summary of the impact'], how='all')
 
-    # Go through all the funders to see how many case studies come from each one
-    funder_all_studies = {}
-    funder_software_anywhere = {}
-    funder_software_title = {}
-    funder_software_summary = {}
-    for funder in list_of_funders:
-        # Creat dict showing how many case studies - of any type - registered by each funder
-        funder_all_studies[funder] = collapse_df(df, funder)
-        # Creat dicts for each funder showing how many case studies included the search word
-        # 1. anywhere, 2. just in title, 3. just in the title or summary
-        funder_software_anywhere[funder] = collapse_df(df_software_anywhere, funder)
-        funder_software_title[funder] = collapse_df(df_software_title, funder)
-        funder_software_summary[funder] = collapse_df(df_software_summary, funder)
+    dict_of_software_dfs = {}
+    for name in discipline_cols:
+        dict_of_software_dfs[name] = df_software.dropna(subset=[name], how='all')
+
+#    df_summary_software_by_funder = summarise_dfs(dict_of_software_dfs, funder_cols, funder)
+
+    print(dict_of_software_dfs)
+
+'''''
 
     ########### What values do we want to print? ################
 
