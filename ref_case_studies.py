@@ -65,7 +65,7 @@ def cut_to_specific_word(dataframe, specific_word, part_in_bid):
     # Cut dataframe down to only those rows with a word in the right column
     current_df = dataframe[dataframe[part_in_bid].str.contains(specific_word)]
     # Add a new col to indicate where the specific word was found
-    new_col_name = 'Word found in ' + part_in_bid
+    new_col_name = 'found_in_' + part_in_bid
     current_df[new_col_name] = part_in_bid
     # Drop all columns except the case study and the col showing where the word was found
     current_df = current_df[['Case Study Id', new_col_name]]
@@ -122,6 +122,18 @@ def associate_new_data(dataframe, df_studies_by_funder):
     dataframe = pd.merge(left=dataframe,right=df_studies_by_funder, how='left', left_on='Case Study Id', right_on='Case Study Id')
         
     return dataframe
+
+
+def col_locator(dataframe, search_term):
+
+    located_cols = []
+    term_length = len(search_term)
+    for current in dataframe.columns:
+        if current[:term_length] == search_term:
+            located_cols.append(current)
+    return located_cols
+
+
 
 def get_col_names(df, cols_to_remove_1, cols_to_remove_2):
 
@@ -242,8 +254,6 @@ def main():
 
     # Associate case study IDs with specific disciplines
     df = associate_new_data(df, df_studies_by_discipline)
-    
-    
 
     # Create a list of the available funders.
     # Easily done by taking the col names of df_studies_by_funder
@@ -254,26 +264,26 @@ def main():
     # Go through the parts of the bid, and for each one look for the search word, record how
     # many case studies were found to match, then add a new column to identify this location
     # in the original dataframe
-#    how_many_found = {}
     for part_in_bid in possible_search_places:
-        # Find the word (identified by the second param in the following)
-        # in different parts of the dataframe
         df_cut = cut_to_specific_word(df, WORD_TO_SEARCH_FOR, part_in_bid)
-#        how_many_found[part_in_bid] = len(df_cut)
         df = merge_search_place(df, df_cut)
 
+    # Create a list of the cols that hold location data in them
+    found_in_cols = col_locator(df, 'found_in_')
+
     # For ease of calculation later, create a new column which is a summary of the
-    # other location 
-    df.loc[df[['Word found in Title',
-               'Word found in Summary of the impact',
-               'Word found in Underpinning research',
-               'Word found in References to the research',
-               'Word found in Details of the impact'
-               ]].notnull().any(1), 'Word found in anywhere'] = 'anywhere'
+    # other location
+    df.loc[df[found_in_cols].notnull().any(1), 'found_in_anywhere'] = 'anywhere'
 
-    
+    # In the step above, we've added another location column, so add
+    # this to the list
+    found_in_cols.append('found_in_anywhere')
 
+    # Create a list of the cols that hold discipline data in them
+    discipline_cols = col_locator(df, 'discipline_')
 
+    # Create a list of the cols that hold funder data in them
+    funder_cols = col_locator(df, 'funder_')
 
 
     ########## Now to start getting some data about funders ########## 
