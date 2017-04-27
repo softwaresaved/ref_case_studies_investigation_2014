@@ -156,7 +156,7 @@ def summarise_dfs(dict_of_dfs, col_list, remove_string):
         df_value_name = 'How many'
         # Length of df corresponds to number of times the search word was found
         dictionary[name] = len(dict_of_dfs[current])
-
+            
     dataframe = pd.DataFrame(list(dictionary.items()), columns=[df_name, df_value_name])
     # Use the names as the index column rather than the numeric one that's created in
     # the step above
@@ -169,7 +169,7 @@ def summarise_dfs(dict_of_dfs, col_list, remove_string):
     return dataframe
 
 
-def write_results_to_xls(dataframe, loc_and_title):
+def write_results_to_xls(dataframe, name):
     """
     Takes a dataframe and writes it to an Excel spreadsheet based on a string
     which describes the save location and title
@@ -177,20 +177,13 @@ def write_results_to_xls(dataframe, loc_and_title):
     :return: nothing (writes an Excel spreadsheet)
     """
     
-    writer = ExcelWriter(loc_and_title)
+    writer = ExcelWriter(EXCEL_RESULT_STORE + name + '.xlsx')
     # Write result to Excel
     dataframe.to_excel(writer, 'Sheet1', index=False)
     # Close Excel writer
     writer.save()
 
     return
-
-
-def add_relative_percentage(dataframe, col_for_calc, df_master_values, col_for_relative):
-
-    dataframe['relative percentage'] = round(100 * (dataframe[col_for_calc]/df_master_values[col_for_relative]),1)    
-
-    return dataframe
 
 
 def plot_bar_from_df(dataframe, y_col, title):
@@ -247,6 +240,11 @@ def main():
     # Associate case study IDs with specific disciplines
     df = associate_new_data(df, df_studies_by_discipline)
 
+    # This is the super dataframe with all information in it. Might be handy
+    # to other people in this form, so let's save it
+    # Write out to Excel
+#    write_results_to_xls(df, 'all_ref_case_study_data')
+
     # Create a list of the available funders.
     # Easily done by taking the col names of df_studies_by_funder
     # and removing the Case Study Id item
@@ -280,7 +278,9 @@ def main():
     # Create a new dataframe that only contains case studies that include
     # the search term in them somewhere
     df_software = df.dropna(subset=['found_in_anywhere'], how='all')
-    print(df_software)
+    
+    # Write out to Excel
+#    write_results_to_xls(df_software, WORD_TO_SEARCH_FOR + '_case_studies_only')
 
     # Create a list of the cols that hold discipline data in them
     discipline_cols = col_locator(df, discipline)
@@ -306,14 +306,19 @@ def main():
     df_summary_discipline = summarise_dfs(dict_of_dfs, discipline_cols, discipline)
     df_summary_funder = summarise_dfs(dict_of_dfs, funder_cols, funder)
 
-
+    # Now do the same, but based on the df that contains only
+    # case studies related to software
     dict_of_software_dfs = {}
-    for name in discipline_cols:
+    for name in discipline_cols + funder_cols:
         dict_of_software_dfs[name] = df_software.dropna(subset=[name], how='all')
 
-#    df_summary_software_by_funder = summarise_dfs(dict_of_software_dfs, funder_cols, funder)
+    # Create summaries of the df that contains only case studies
+    # related to software
+    df_summary_software_by_funder = summarise_dfs(dict_of_software_dfs, funder_cols, funder)
+    df_summary_software_by_discipline = summarise_dfs(dict_of_software_dfs, discipline_cols, discipline)
 
-    print(dict_of_software_dfs)
+#    df_summary_software_by_funder['relative_percent'] = round(100 * (df_summary_software_by_funder['How many']/df_summary_software_by_funder[df_value_name].sum()),1)
+
 
 '''''
 
