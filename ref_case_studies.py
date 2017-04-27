@@ -134,17 +134,39 @@ def col_locator(dataframe, search_term):
     return located_cols
 
 
-
-def get_col_names(df, cols_to_remove_1, cols_to_remove_2):
-
-    # Get all names in the dataframe
-    all_col_names = list(df.columns)
-    # Remove the first list of col names
-    temp_list = [x for x in all_col_names if x not in cols_to_remove_1]
-    # Remove the second list of col names
-    remaining_cols = [x for x in temp_list if x not in cols_to_remove_2]
+def summarise_dfs(dict_of_dfs, col_list, remove_string):
+    """
+    Takes a dictionary of dataframes, each of which corresponds to a search term stored in the col_list.
+    Each dataframe has been collapsed so the only rows that exist are ones that include the search term
+    in the appropriate column. This means that the length of the dataframe corresponds to the number
+    of times that search term was found in the super dataframe which was its parent
+    see - cut_to_specific_word
+    Combines the search terms and lengths into a dict which is transformed into a dataframe to make
+    later processing easier. Adds a percentage columns and then sorts the dataframe into ascending order
+    :params: a dict of dfs and a list of columns, a string used to form a name for the resulting dataframe
+    :return: a sorted dataframe
+    """
+    # Need this for later string manipulation
+    length = len(remove_string)
     
-    return remaining_cols
+    dictionary ={}
+    for current in col_list:
+        name = current[length:]
+        df_name = remove_string[:length-1]
+        df_value_name = 'How many'
+        # Length of df corresponds to number of times the search word was found
+        dictionary[name] = len(dict_of_dfs[current])
+
+    dataframe = pd.DataFrame(list(dictionary.items()), columns=[df_name, df_value_name])
+    # Use the names as the index column rather than the numeric one that's created in
+    # the step above
+    dataframe.set_index([df_name], inplace=True)
+    dataframe['percentage'] = round(100 * (dataframe[df_value_name]/dataframe[df_value_name].sum()),1)
+    dataframe.sort_values([df_value_name], inplace=True)
+    
+    print(dataframe)
+
+    return dataframe
 
 
 def write_results_to_xls(dataframe, loc_and_title):
@@ -162,36 +184,6 @@ def write_results_to_xls(dataframe, loc_and_title):
     writer.save()
 
     return
-
-
-def collapse_df(dataframe, colname):
-    '''
-    Takes a dataframe and a colname, then drops all rows in that colname
-    that are NaN
-    :params: a dataframe and column from that dataframe
-    :return: a dataframe with all rows removed that have an NaN in the identified column
-    '''
-
-    dataframe = dataframe.dropna(subset=[colname], how='all')
-    number_found = len(dataframe)
-
-    return number_found
-
-
-def convert_to_df(dict, index_name, value_name):
-
-    dataframe = pd.DataFrame(list(dict.items()), columns=[index_name, value_name])
-    dataframe.set_index([index_name], inplace=True)
-    dataframe.sort_values([value_name], inplace=True)
-
-    return dataframe
-
-
-def add_percent(dataframe, colname):
-
-    dataframe['percentage'] = round(100 * (dataframe[colname]/dataframe[colname].sum()),1)
-
-    return dataframe
 
 
 def add_relative_percentage(dataframe, col_for_calc, df_master_values, col_for_relative):
@@ -268,8 +260,15 @@ def main():
         df_cut = cut_to_specific_word(df, WORD_TO_SEARCH_FOR, part_in_bid)
         df = merge_search_place(df, df_cut)
 
+
+    # Create some names that will be used to represent strings that are used
+    # to identify columns in the analysis
+    found_in = 'found_in_'
+    discipline = 'discipline_'
+    funder = 'funder_'
+
     # Create a list of the cols that hold location data in them
-    found_in_cols = col_locator(df, 'found_in_')
+    found_in_cols = col_locator(df, found_in)
 
     # For ease of calculation later, create a new column which is a summary of the
     # other location
@@ -280,18 +279,25 @@ def main():
     found_in_cols.append('found_in_anywhere')
 
     # Create a list of the cols that hold discipline data in them
-    discipline_cols = col_locator(df, 'discipline_')
+    discipline_cols = col_locator(df, discipline)
 
     # Create a list of the cols that hold funder data in them
-    funder_cols = col_locator(df, 'funder_')
+    funder_cols = col_locator(df, funder)
 
+    # Create a dict of dataframes, each of which holds the data
+    # related to a specific found_in, funder or discipline
+    # Start by adding the three locator lists together
+    all_locator_cols = found_in_cols + discipline_cols + funder_cols
+    dict_of_dfs = {}
+    
+    for name in all_locator_cols:
+        dict_of_dfs[name] = df.dropna(subset=[name], how='all')
 
-    ########## Now to start getting some data about funders ########## 
+    df_summary_found_in = summarise_dfs(dict_of_dfs, found_in_cols, found_in)
+    df_summary_discipline = summarise_dfs(dict_of_dfs, discipline_cols, discipline)
+    df_summary_funder = summarise_dfs(dict_of_dfs, funder_cols, funder)
 
-    # Remove all col names except those relating to those that identify where
-    # the word was found (i.e. "Found in Title, Found in...")
-    location_cols = get_col_names(df, original_cols, list_of_funders)
-
+'''''
     # Make new dataframes corresponding to case studies that mention the word
     # anywhere or just those that mention it in the title, or those that mention
     # it just in the title or summary of impact
@@ -299,8 +305,6 @@ def main():
 #    df_software_title = df.dropna(subset=['Search word found in Title'], how='all')
 #    df_software_summary = df.dropna(subset=['Search word found in Summary of the impact'], how='all')
 
-
-'''''
     # Go through all the funders to see how many case studies come from each one
     funder_all_studies = {}
     funder_software_anywhere = {}
