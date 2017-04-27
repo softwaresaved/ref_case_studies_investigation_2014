@@ -275,6 +275,8 @@ def main():
     df_software_title = df.dropna(subset=['Search word found in Title'], how='all')
     df_software_summary = df.dropna(subset=['Search word found in Summary of the impact'], how='all')
 
+
+'''''
     # Go through all the funders to see how many case studies come from each one
     funder_all_studies = {}
     funder_software_anywhere = {}
@@ -291,14 +293,14 @@ def main():
 
     ########### What values do we want to print? ################
 
-   #list = [dict name, name of measurement, value of measurement, title of chart]
-    master_values = [funder_all_studies, 'Funder', 'Number of case studies', 'Number of REF case studies registered by funder']
-    calc1 = [how_many_found, 'Where', 'Times word found', 'Where "' + WORD_TO_SEARCH_FOR + '" was found in case study']
-    calc2 = [funder_software_anywhere, 'Funder', 'Times word found anywhere', 'Number of REF case studies mentioning"'
+   #list = [dict name, name of measurement, values, title of chart]
+    master_values = [funder_all_studies, 'Funder of case study', 'Number', 'Number of REF case studies registered by funder']
+    calc1 = [how_many_found, 'Where word was found', 'Number', 'Where "' + WORD_TO_SEARCH_FOR + '" was found in case study']
+    calc2 = [funder_software_anywhere, 'Funder', 'Number', 'Number of REF case studies mentioning"'
             + WORD_TO_SEARCH_FOR + '" anywhere in the case study']
-    calc3 = [funder_software_title, 'Funder', 'Times word found in title', 'Number of REF case studies mentioning"'
+    calc3 = [funder_software_title, 'Funder', 'Number', 'Number of REF case studies mentioning"'
             + WORD_TO_SEARCH_FOR + '" in the title']
-    calc4 = [funder_software_summary, 'Funder', 'Times word found in summary','Number of REF case studies mentioning"'
+    calc4 = [funder_software_summary, 'Funder', 'Number','Number of REF case studies mentioning"'
             + WORD_TO_SEARCH_FOR + '" in the summary']
     
     things_to_plot = [calc1, calc2, calc3, calc4]
@@ -316,7 +318,7 @@ def main():
             if things_to_plot[count] == things_to_add_relative_percentage[count2]:
                 df_current = add_relative_percentage(df_current, things_to_plot[count][2], df_master_values, master_values[2])
                 plot_bar_from_df(df_current, 'relative percentage', 'Case studies relative to funder')
-                print(df_current)
+                print(df_current)'''
 
 if __name__ == '__main__':
     main()
