@@ -185,6 +185,22 @@ def write_results_to_xls(dataframe, name):
 
     return
 
+def relative_percentages(dataframe, df_summary, subject):
+    '''
+    Takes a dataframe and a dataframe with summary data, then creates relative percentages
+    in the first dataframe. In other words, what percentage of case studies from a specific
+    funder included the search term?
+    :params: a dataframe, a dataframe with summary data, a subject that is used to name
+             one of the relative percentages
+    :return: a dataframe with relative percentages
+    '''
+
+    sum_value = df_summary['How many'].sum()
+    dataframe['percentage relative to all case studies'] = round(100 * (dataframe['How many']/sum_value),1)
+    dataframe['percentage relative to case studies from each ' + subject] = round(100 * (dataframe['How many']/df_summary['How many']),1)
+
+    return dataframe
+
 
 def plot_bar_from_df(dataframe, y_col, title):
     """
@@ -303,8 +319,8 @@ def main():
     # Create summaries of the data based on where the term was found,
     # in which discipline it was basde, and by who funded it
     df_summary_found_in = summarise_dfs(dict_of_dfs, found_in_cols, found_in)
-    df_summary_discipline = summarise_dfs(dict_of_dfs, discipline_cols, discipline)
     df_summary_funder = summarise_dfs(dict_of_dfs, funder_cols, funder)
+    df_summary_discipline = summarise_dfs(dict_of_dfs, discipline_cols, discipline)
 
     # Now do the same, but based on the df that contains only
     # case studies related to software
@@ -317,39 +333,25 @@ def main():
     df_summary_software_by_funder = summarise_dfs(dict_of_software_dfs, funder_cols, funder)
     df_summary_software_by_discipline = summarise_dfs(dict_of_software_dfs, discipline_cols, discipline)
 
-#    df_summary_software_by_funder['relative_percent'] = round(100 * (df_summary_software_by_funder['How many']/df_summary_software_by_funder[df_value_name].sum()),1)
+    df_summary_software_by_funder = relative_percentages(df_summary_software_by_funder, df_summary_funder, 'funder')
+    df_summary_software_by_discipline = relative_percentages(df_summary_software_by_discipline, df_summary_discipline, 'discipline')
 
 
-'''''
+    ############ Plotting #############
 
-    ########### What values do we want to print? ################
+   #list = [df name, values column, title of chart]
+    plot1 = [df_summary_funder, 'All REF case studies by funder']
+    plot2 = [df_summary_discipline, 'All REF case studies by discipline']
+    plot3 = [df_summary_found_in, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR]
+    plot4 = [df_summary_software_by_funder, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR]
+    plot5 = [df_summary_software_by_discipline, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR]
 
-   #list = [dict name, name of measurement, values, title of chart]
-    master_values = [funder_all_studies, 'Funder of case study', 'Number', 'Number of REF case studies registered by funder']
-    calc1 = [how_many_found, 'Where word was found', 'Number', 'Where "' + WORD_TO_SEARCH_FOR + '" was found in case study']
-    calc2 = [funder_software_anywhere, 'Funder', 'Number', 'Number of REF case studies mentioning"'
-            + WORD_TO_SEARCH_FOR + '" anywhere in the case study']
-    calc3 = [funder_software_title, 'Funder', 'Number', 'Number of REF case studies mentioning"'
-            + WORD_TO_SEARCH_FOR + '" in the title']
-    calc4 = [funder_software_summary, 'Funder', 'Number','Number of REF case studies mentioning"'
-            + WORD_TO_SEARCH_FOR + '" in the summary']
+    vanilla_plots = [plot1, plot2, plot3, plot4, plot5]
     
-    things_to_plot = [calc1, calc2, calc3, calc4]
-    things_to_add_relative_percentage = [calc2, calc3, calc4]
+    for count in range(0,len(vanilla_plots)):
+        plot_bar_from_df(vanilla_plots[count][0], 'How many', vanilla_plots[count][1])
+        plot_bar_from_df(vanilla_plots[count][0], 'percentage', vanilla_plots[count][1])
 
-    df_master_values = convert_to_df(master_values[0],master_values[1], master_values[2])
-    df_master_values = add_percent(df_master_values, master_values[2])
-    plot_bar_from_df(df_master_values, master_values[2], master_values[3])
-
-    for count in range(0,len(things_to_plot)):
-        df_current = convert_to_df(things_to_plot[count][0],things_to_plot[count][1], things_to_plot[count][2])
-        df_current = add_percent(df_current, things_to_plot[count][2])
-#        plot_bar_from_df(df_current, things_to_plot[count][2], things_to_plot[count][3])
-        for count2 in range(0,len(things_to_add_relative_percentage)):
-            if things_to_plot[count] == things_to_add_relative_percentage[count2]:
-                df_current = add_relative_percentage(df_current, things_to_plot[count][2], df_master_values, master_values[2])
-                plot_bar_from_df(df_current, 'relative percentage', 'Case studies relative to funder')
-                print(df_current)'''
 
 if __name__ == '__main__':
     main()
