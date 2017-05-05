@@ -184,7 +184,7 @@ def write_results_to_xls(dataframe, title):
     
     filename = title.replace(" ", "_")
 
-    writer = ExcelWriter(EXCEL_RESULT_CHART_STORE + filename + '.xlsx')
+    writer = ExcelWriter(EXCEL_RESULT_CHART + filename + '.xlsx')
     # Write result to Excel
     dataframe.to_excel(writer, 'Sheet1')
     # Close Excel writer
