@@ -6,6 +6,10 @@ from pandas import ExcelWriter
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+# This gets the pre-formatted short chart labels from a lookup file
+from chart_label_lookup import short_plot_labels_discipline
+from chart_label_lookup import short_plot_labels_funder
+
 #import logging
 
 # The word we're going to look for - in lowercase please
@@ -205,14 +209,14 @@ def relative_percentages(dataframe, df_summary, subject):
     return dataframe
 
 
-def plot_bar_from_df(dataframe, y_col, title):
+def plot_bar_from_df(dataframe, y_col, title, y_axis_title):
     """
     :params: 
     :return: 
     """
-
     dataframe.plot(y = y_col, kind='bar', legend=None)
     plt.title(title)
+    plt.ylabel(y_axis_title)
     # This provides more space around the chart to make it prettier        
     plt.tight_layout(True)
     filename = title.replace(" ", "_")
@@ -337,22 +341,34 @@ def main():
     df_summary_software_by_funder = relative_percentages(df_summary_software_by_funder, df_summary_funder, 'funder')
     df_summary_software_by_discipline = relative_percentages(df_summary_software_by_discipline, df_summary_discipline, 'discipline')
 
+    ########## Prepping for plotting ###############
+
+    for index_name in df_summary_discipline.index.values:
+        df_summary_discipline.rename(index={index_name: short_plot_labels_discipline[index_name]}, inplace=True)
+        df_summary_software_by_discipline.rename(index={index_name: short_plot_labels_discipline[index_name]}, inplace=True)
+        
+    for index_name in df_summary_funder.index.values:
+        df_summary_funder.rename(index={index_name: short_plot_labels_funder[index_name]}, inplace=True)
+        df_summary_software_by_funder.rename(index={index_name: short_plot_labels_funder[index_name]}, inplace=True)
 
     ############ Plotting #############
 
-   #list = [df name, values column, title of chart]
-    plot1 = [df_summary_funder, 'All REF case studies by funder']
-    plot2 = [df_summary_discipline, 'All REF case studies by discipline']
-    plot3 = [df_summary_found_in, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR]
-    plot4 = [df_summary_software_by_funder, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR + ' by funder']
-    plot5 = [df_summary_software_by_discipline, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR + ' by discipline']
-
-    vanilla_plots = [plot1, plot2, plot3, plot4, plot5]
+    # Add a new sublist to add a new plot
+    # list should be of the form: [df name, values column, title of chart]
+    vanilla_plots = [
+       [df_summary_funder, 'All REF case studies by funder'],
+       [df_summary_discipline, 'All REF case studies by discipline'],
+       [df_summary_found_in, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR + ' by location of word'],
+       [df_summary_software_by_funder, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR + ' by funder'],
+       [df_summary_software_by_discipline, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR + ' by discipline']
+    ]
     
     for count in range(0,len(vanilla_plots)):
-        plot_bar_from_df(vanilla_plots[count][0], 'How many', vanilla_plots[count][1])
-        plot_bar_from_df(vanilla_plots[count][0], 'percentage', vanilla_plots[count][1] + ' by percentage')
+        plot_bar_from_df(vanilla_plots[count][0], 'How many', vanilla_plots[count][1], 'Number')
+        plot_bar_from_df(vanilla_plots[count][0], 'percentage', vanilla_plots[count][1] + ' (percentage)', 'Percentage')
         write_results_to_xls(vanilla_plots[count][0], vanilla_plots[count][1])
+
+    print(df_summary_discipline)
 
 
 if __name__ == '__main__':
