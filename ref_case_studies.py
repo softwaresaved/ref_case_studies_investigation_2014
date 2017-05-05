@@ -14,6 +14,7 @@ DATAFILENAME = "./data/CaseStudies.xlsx"
 STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.xlsx"
 STUDIES_BY_DISCIPLINE = "./data/list_of_studies_by_discipline.xlsx"
 EXCEL_RESULT_STORE = "./outputs/"
+EXCEL_RESULT_CHART_STORE = "./outputs/chart_data/"
 CHART_RESULT_STORE = "./outputs/charts/"
 
 def import_xls_to_df(filename, name_of_sheet):
@@ -169,7 +170,7 @@ def summarise_dfs(dict_of_dfs, col_list, remove_string):
     return dataframe
 
 
-def write_results_to_xls(dataframe, name):
+def write_results_to_xls(dataframe, title):
     """
     Takes a dataframe and writes it to an Excel spreadsheet based on a string
     which describes the save location and title
@@ -177,9 +178,11 @@ def write_results_to_xls(dataframe, name):
     :return: nothing (writes an Excel spreadsheet)
     """
     
-    writer = ExcelWriter(EXCEL_RESULT_STORE + name + '.xlsx')
+    filename = title.replace(" ", "_")
+
+    writer = ExcelWriter(EXCEL_RESULT_CHART_STORE + filename + '.xlsx')
     # Write result to Excel
-    dataframe.to_excel(writer, 'Sheet1', index=False)
+    dataframe.to_excel(writer, 'Sheet1')
     # Close Excel writer
     writer.save()
 
@@ -210,14 +213,12 @@ def plot_bar_from_df(dataframe, y_col, title):
 
     dataframe.plot(y = y_col, kind='bar', legend=None)
     plt.title(title)
-#    if xaxis != None:
-#        plt.xlabel(xaxis)
-#    if yaxis != None:
-#        plt.ylabel(yaxis)
     # This provides more space around the chart to make it prettier        
     plt.tight_layout(True)
-#    plt.savefig(CHART_RESULT_STORE + filename + '.png', format = 'png', dpi = 150)
-    plt.show()
+    filename = title.replace(" ", "_")
+    print(filename)
+    plt.savefig(CHART_RESULT_STORE + filename + '.png', format = 'png', dpi = 150)
+#    plt.show()
     
     return
 
@@ -343,14 +344,15 @@ def main():
     plot1 = [df_summary_funder, 'All REF case studies by funder']
     plot2 = [df_summary_discipline, 'All REF case studies by discipline']
     plot3 = [df_summary_found_in, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR]
-    plot4 = [df_summary_software_by_funder, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR]
-    plot5 = [df_summary_software_by_discipline, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR]
+    plot4 = [df_summary_software_by_funder, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR + ' by funder']
+    plot5 = [df_summary_software_by_discipline, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR + ' by discipline']
 
     vanilla_plots = [plot1, plot2, plot3, plot4, plot5]
     
     for count in range(0,len(vanilla_plots)):
         plot_bar_from_df(vanilla_plots[count][0], 'How many', vanilla_plots[count][1])
-        plot_bar_from_df(vanilla_plots[count][0], 'percentage', vanilla_plots[count][1])
+        plot_bar_from_df(vanilla_plots[count][0], 'percentage', vanilla_plots[count][1] + ' by percentage')
+        write_results_to_xls(vanilla_plots[count][0], vanilla_plots[count][1])
 
 
 if __name__ == '__main__':
