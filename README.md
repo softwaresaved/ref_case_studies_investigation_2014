@@ -4,10 +4,15 @@ The idea behind this code is to investigate the REF case studies that were recor
 
 # TOC
 [Running the analysis](#running-the-analysis)
+
 [Main files and dirs](#main-files-and-dirs)
+
 [About the data](#about-the-data)
+
 [Data origin](#data-origin)
+
 [Problem number 1](#problem-number-1)
+
 [Problem number 2](#problem-number-2)
 
 ## Running the analysis
