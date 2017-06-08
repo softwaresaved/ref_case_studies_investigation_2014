@@ -11,9 +11,11 @@ The main directory contains:
 1. LICENSE: The licence for the python scripts in this repo
 1. LICENSE_FOR_DATA: The licence for the data related to the case studies (imposed by the REF)
 1. ref_case_studies.py: the main script for conducting the analysis
-1. requirements.txt: used for easy import of the necessary libraries into the virtual environment [(see the guide)](http://docs.python-guide.org/en/latest/dev/virtualenvs/)
-data					venv
-organise_studies_by_funder.py
+1. requirements.txt: used for easy import of the necessary libraries into the virtual environment (see the [guide](http://docs.python-guide.org/en/latest/dev/virtualenvs/))
+1. data: directory in which all original data is stored
+1. outputs: directory for storing all analysis outputs (charts and suchlike)
+1. organise_studies_by_funder.py: script for including funder details in analysis (see [below](#problem-number-1))
+1. organise_studies_by_discipline.py: script for including Research Subject Area details in analysis
 outputs
 
 
@@ -35,7 +37,7 @@ The data is available from the the [REF website](http://impact.ref.ac.uk/CaseStu
 
 The data used in the study (CaseStudies.xlsx) was downloaded on 6 April 2017 from [REF2014 case studies](http://impact.ref.ac.uk/CaseStudies/Results.aspx?val=Show%20All#). It includes all 6637 case studies available from REF 2014. The data was downloaded in Excel format and in the section entitled "Sections to include in download:" the "Select all" option was seleted.
 
-## Problem no.1 with the data on funder and research subject area
+## Problem number 1
 
 There's an annoying issue with the REF data. You can query the case studies through the web interface to find all case studies by a specific funder, or all case studies from a specific research "Research Subject Area", and you will be presented with a list of case studies. However, the information is not included explicitly in the downloaded summary of the results. In other words, the Excel spreadsheet does not include a column entitle "Funder" or "Research Subject Area".
 
