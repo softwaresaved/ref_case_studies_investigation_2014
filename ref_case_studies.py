@@ -10,16 +10,18 @@ import math
 from chart_label_lookup import short_plot_labels_discipline
 from chart_label_lookup import short_plot_labels_funder
 
-#import logging
 
 # The word we're going to look for - in lowercase please
 WORD_TO_SEARCH_FOR = 'software'
+
+# Other global variables
 DATAFILENAME = "./data/CaseStudies.xlsx"
 STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.xlsx"
 STUDIES_BY_DISCIPLINE = "./data/list_of_studies_by_discipline.xlsx"
 EXCEL_RESULT_STORE = "./outputs/"
 EXCEL_RESULT_CHART_STORE = "./outputs/chart_data/"
 CHART_RESULT_STORE = "./outputs/charts/"
+
 
 def import_xls_to_df(filename, name_of_sheet):
     """
@@ -184,7 +186,7 @@ def write_results_to_xls(dataframe, title):
     
     filename = title.replace(" ", "_")
 
-    writer = ExcelWriter(EXCEL_RESULT_CHART + filename + '.xlsx')
+    writer = ExcelWriter(EXCEL_RESULT_STORE + filename + '.xlsx')
     # Write result to Excel
     dataframe.to_excel(writer, 'Sheet1')
     # Close Excel writer
@@ -252,14 +254,8 @@ def main():
     # Import case study ids for each funder
     df_studies_by_funder = import_xls_to_df(STUDIES_BY_FUNDER, 'Sheet1')
     
-    # Import case study ids for each funder
-    df_studies_by_discipline = import_xls_to_df(STUDIES_BY_DISCIPLINE, 'Sheet1')
-    
     # Associate case study IDs with specific funders
     df = associate_new_data(df, df_studies_by_funder)
-
-    # Associate case study IDs with specific disciplines
-    df = associate_new_data(df, df_studies_by_discipline)
 
     # This is the super dataframe with all information in it. Might be handy
     # to other people in this form, so let's save it
@@ -282,7 +278,6 @@ def main():
     # Create some names that will be used to represent strings that are used
     # to identify columns in the analysis
     found_in = 'found_in_'
-    discipline = 'discipline_'
     funder = 'funder_'
 
     # Create a list of the cols that hold location data in them
@@ -303,20 +298,17 @@ def main():
     # Write out to Excel
 #    write_results_to_xls(df_software, WORD_TO_SEARCH_FOR + '_case_studies_only')
 
-    # Create a list of the cols that hold discipline data in them
-    discipline_cols = col_locator(df, discipline)
-
     # Create a list of the cols that hold funder data in them
     funder_cols = col_locator(df, funder)
 
     # Create a dict of dataframes, each of which holds the data
-    # related to a specific found_in, funder or discipline
+    # related to a specific found_in, or funder
     # Start by adding the three locator lists together
-    all_locator_cols = found_in_cols + discipline_cols + funder_cols
+    all_locator_cols = found_in_cols + funder_cols
     dict_of_dfs = {}
     
-    # Drop all columns that aren't related to the found_in, funder
-    # or discipline in which we're interested, and store them in
+    # Drop all columns that aren't related to the found_in or funder
+    #  in which we're interested, and store them in
     # a dict of dataframes for later processing
     for name in all_locator_cols:
         dict_of_dfs[name] = df.dropna(subset=[name], how='all')
@@ -325,27 +317,20 @@ def main():
     # in which discipline it was basde, and by who funded it
     df_summary_found_in = summarise_dfs(dict_of_dfs, found_in_cols, found_in)
     df_summary_funder = summarise_dfs(dict_of_dfs, funder_cols, funder)
-    df_summary_discipline = summarise_dfs(dict_of_dfs, discipline_cols, discipline)
 
     # Now do the same, but based on the df that contains only
     # case studies related to software
     dict_of_software_dfs = {}
-    for name in discipline_cols + funder_cols:
+    for name in funder_cols:
         dict_of_software_dfs[name] = df_software.dropna(subset=[name], how='all')
 
     # Create summaries of the df that contains only case studies
     # related to software
     df_summary_software_by_funder = summarise_dfs(dict_of_software_dfs, funder_cols, funder)
-    df_summary_software_by_discipline = summarise_dfs(dict_of_software_dfs, discipline_cols, discipline)
-
     df_summary_software_by_funder = relative_percentages(df_summary_software_by_funder, df_summary_funder, 'funder')
-    df_summary_software_by_discipline = relative_percentages(df_summary_software_by_discipline, df_summary_discipline, 'discipline')
+
 
     ########## Prepping for plotting ###############
-
-    for index_name in df_summary_discipline.index.values:
-        df_summary_discipline.rename(index={index_name: short_plot_labels_discipline[index_name]}, inplace=True)
-        df_summary_software_by_discipline.rename(index={index_name: short_plot_labels_discipline[index_name]}, inplace=True)
         
     for index_name in df_summary_funder.index.values:
         df_summary_funder.rename(index={index_name: short_plot_labels_funder[index_name]}, inplace=True)
@@ -357,18 +342,14 @@ def main():
     # list should be of the form: [df name, values column, title of chart]
     vanilla_plots = [
        [df_summary_funder, 'All REF case studies by funder'],
-       [df_summary_discipline, 'All REF case studies by discipline'],
        [df_summary_found_in, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR + ' by location of word'],
-       [df_summary_software_by_funder, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR + ' by funder'],
-       [df_summary_software_by_discipline, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR + ' by discipline']
+       [df_summary_software_by_funder, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR + ' by funder']
     ]
     
     for count in range(0,len(vanilla_plots)):
         plot_bar_from_df(vanilla_plots[count][0], 'How many', vanilla_plots[count][1], 'Number')
         plot_bar_from_df(vanilla_plots[count][0], 'percentage', vanilla_plots[count][1] + ' (percentage)', 'Percentage')
         write_results_to_xls(vanilla_plots[count][0], vanilla_plots[count][1])
-
-    print(df_summary_discipline)
 
 
 if __name__ == '__main__':
