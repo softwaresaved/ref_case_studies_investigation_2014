@@ -2,6 +2,14 @@
 
 The idea behind this code is to investigate the REF case studies that were recorded in 2014 to find how many reference software and then cross-section the resulting data based on aspects like which funder was involved and what field the research derived from.
 
+# TOC
+[Running the analysis](#running-the-analysis)
+[Main files and dirs](#main-files-and-dirs)
+[About the data](#about-the-data)
+[Data origin](#data-origin)
+[Problem number 1](#problem-number-1)
+[Problem number 2](#problem-number-2)
+
 ## Running the analysis
 
 The code runs is based on python 3.5 and is easiet to run in a virtual environment.
