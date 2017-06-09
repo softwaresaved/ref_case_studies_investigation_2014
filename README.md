@@ -2,7 +2,12 @@
 
 The idea behind this code is to investigate the REF case studies that were recorded in 2014 to find how many reference software and then cross-section the resulting data based on aspects like which funder was involved and what field the research derived from.
 
+I'm making the code open mainly so that the results I publish can be reproduced. However, the code could also be re-used if someone is interested in investigating other keywords that appear in the REF case studies.
+
 # TOC
+
+[Prerequisites](prerequisites)
+
 [Running the analysis](#running-the-analysis)
 
 [Main files and dirs](#main-files-and-dirs)
@@ -14,6 +19,59 @@ The idea behind this code is to investigate the REF case studies that were recor
 [Problem number 1](#problem-number-1)
 
 [Problem number 2](#problem-number-2)
+
+# Prerequisites
+The code requires Python 3. The following libraries are needed (note that if you install the virtual environment as described below the libraries will be installed automatically):
+
+1. appdirs
+1. cycler
+1. et-xmlfile
+1. jdcal
+1. matplotlib
+1. numpy
+1. openpyxl
+1. packaging
+1. pandas
+1. pyparsing
+1. python-dateutil
+1. pytz
+1. six
+1. xlrd
+
+# Inputs, outputs and operation
+
+## Inputs
+
+All outputs are stored in /data
+
+1. CaseStudies.xlsx: the case study data downloaded from the REF website (see [below](#data-origin))
+1. list_of_studies_by_council.xlsx: a spreadsheet showing which case studies derive from which funder
+1. list_of_studies_by_discipline.xlsx: a spreadsheet showing which case studies derive from which "Research Subject Area"
+
+## Outputs
+
+All outputs are stored in /outputs
+
+1. All_REF_case_studies_by_discipline.xlsx: spreadsheet summarising the Research Subject Area from which each of the case studies derives
+1. REF_case_studies_including_the_word_software_by_discipline.xlsx: spreadsheet summarising the Research Subject Area from which each of the case studies derives - but limited to only the case studies that include the WORD_TO_SEARCH_FOR (see [operation](#operation) below)
+1. All_REF_case_studies_by_funder.xlsx: spreadsheet summarising the funder behind each of the case studies
+1. REF_case_studies_including_the_word_software_by_funder.xlsx: spreadsheet summarising the funder behind each of the case studies  - but limited to only the case studies that include the WORD_TO_SEARCH_FOR (see [operation](#operation) below)
+1. REF_case_studies_including_the_word_software_by_location_of_word.xlsx: summary showing where the WORD_TO_SEARCH_FOR (see [operation](#operation) below) was found in the case studies (e.g. titles, summary, etc.)
+1. all_ref_case_study_data.xlsx: a spreadsheet containing the data from CaseStudies.xlsx combined with that from list_of_studies_by_council.xlsx and list_of_studies_by_discipline.xlsx
+1. chart_data: spreadsheets containing data used to plot charts
+1. charts: png images of the charts that are produced
+
+## Operation
+
+1. A word to search for is set in the WORD_TO_SEARCH_FOR variable (for my uses, I'm usin the word "software")
+1. REF case studies from CaseStudies.xlsx is read in as the main dataframe
+1. Main dataframe is cleaned (made lower case, line breaks within cells are removed, multiple spaces removed)
+1. The main dataframe is appended with new columns to show funders and Research Subject Areas (from list_of_studies_by_council.xlsx and list_of_studies_by_discipline.xlsx)
+1. The main dataframe - which is now a super dataframe that includes all data - is written to an Excel file (all_ref_case_study_data.xlsx) for posterity
+1. The different sections in the case study are searched to identify if they hold the WORD_TO_SEARCH_FOR and this is found the main dataframe is appended with a new column that can identifies in which part of the case study the WORD_TO_SEARCH_FOR was found
+1. A new dataframe containing only case studies in which the WORD_TO_SEARCH_FOR has been found is created
+1. Multiple dataframes are created each one corresponding to case studies with the WORD_TO_SEARCH_FOR found in a specific part of the REF case study (for example, one dataframe where the WORD_TO_SEARCH_FOR was found in the title, one where the WORD_TO_SEARCH_FOR was found in the summary of impact, etc.)
+1. The data from the multiple dataframes is plotted and summarised
 
 ## Running the analysis
 
@@ -28,7 +86,7 @@ The code runs is based on python 3.5 and is easiet to run in a virtual environme
 1. Now run the analysis code:
 ```python ref_case_studies.py```
 
-## Main files and dirs
+## Structure
 
 The main directory contains:
 
