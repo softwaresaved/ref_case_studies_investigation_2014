@@ -6,11 +6,13 @@ I'm making the code open mainly so that the results I publish can be reproduced.
 
 # TOC
 
-[Prerequisites](prerequisites)
+[Prerequisites](#prerequisites)
+
+[Inputs, outputs and operation](#inputs-outputs-and-operation)
 
 [Running the analysis](#running-the-analysis)
 
-[Main files and dirs](#main-files-and-dirs)
+[Structure](#structure)
 
 [About the data](#about-the-data)
 
@@ -73,7 +75,7 @@ All outputs are stored in /outputs
 1. Multiple dataframes are created each one corresponding to case studies with the WORD_TO_SEARCH_FOR found in a specific part of the REF case study (for example, one dataframe where the WORD_TO_SEARCH_FOR was found in the title, one where the WORD_TO_SEARCH_FOR was found in the summary of impact, etc.)
 1. The data from the multiple dataframes is plotted and summarised
 
-## Running the analysis
+# Running the analysis
 
 The code runs is based on python 3.5 and is easiet to run in a virtual environment.
 
@@ -86,7 +88,7 @@ The code runs is based on python 3.5 and is easiet to run in a virtual environme
 1. Now run the analysis code:
 ```python ref_case_studies.py```
 
-## Structure
+# Structure
 
 The main directory contains:
 
@@ -109,20 +111,20 @@ The data directory contains:
 1. list_of_studies_by_discipline.xlsx: all the data from the spreadsheets in "research_subject_area" directory merged into one spreadsheet
 1. universities_address.csv: plan is to use this to associate a university name with a postcode for easy map plotting
 
-## About the data
+# About the data
 
-### Data origin
+## Data origin
 
 The data is available from the the [REF website](http://impact.ref.ac.uk/CaseStudies/Results.aspx?val=Show%20All#)
 
 The data used in the study (CaseStudies.xlsx) was downloaded on 6 April 2017 from [REF2014 case studies](http://impact.ref.ac.uk/CaseStudies/Results.aspx?val=Show%20All#). It includes all 6637 case studies available from REF 2014. The data was downloaded in Excel format and in the section entitled "Sections to include in download:" the "Select all" option was seleted.
 
-### Problem number 1
+## Problem number 1
 
 There's an annoying issue with the REF data. You can query the case studies through the web interface to find all case studies by a specific funder, or all case studies from a specific research "Research Subject Area", and you will be presented with a list of case studies. However, the information is not included explicitly in the downloaded summary of the results. In other words, the Excel spreadsheet does not include a column entitle "Funder" or "Research Subject Area".
 
 To counter this problem, I used the web interface and methodically downloaded Excel spreadsheets to detail the case studies for each funder (see data/studies_by_council) and each Research Subject Area (see data/studies_by_research_subject_area). I then used two scripts to identify the case studies that relate to a particular funder (organise_studies_by_funder.py) or Research Software Area (organise_studies_by_discipline.py) and identify this in the data by adding in new columns added to the CaseStudies.xlsx spreadsheet. The result is written to outputs/all_ref_case_study_data.xlsx. 
 
-### Problem number 2
+## Problem number 2
 
 There's a mistake on the [REF website](http://impact.ref.ac.uk/CaseStudies/Results.aspx?val=Show%20All#). In the drop down for "Project Funders:" it states the name of the funder alongside a number in brackets that shows how many case studies are availabile from that funder. The number in the brackets for the EPSRC is wrong! It says 945, but if you select that option it shows that there are actually only 944 case studies available for the EPSRC. The numbers for the other funders are correct.
