@@ -19,7 +19,6 @@ DATAFILENAME = "./data/CaseStudies.xlsx"
 STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.xlsx"
 STUDIES_BY_DISCIPLINE = "./data/list_of_studies_by_discipline.xlsx"
 EXCEL_RESULT_STORE = "./outputs/"
-EXCEL_RESULT_CHART_STORE = "./outputs/chart_data/"
 CHART_RESULT_STORE = "./outputs/charts/"
 
 
@@ -170,8 +169,6 @@ def summarise_dfs(dict_of_dfs, col_list, remove_string):
     dataframe.set_index([df_name], inplace=True)
     dataframe['percentage'] = round(100 * (dataframe[df_value_name]/dataframe[df_value_name].sum()),1)
     dataframe.sort_values([df_value_name], inplace=True)
-    
-    print(dataframe)
 
     return dataframe
 
@@ -260,7 +257,7 @@ def main():
     # This is the super dataframe with all information in it. Might be handy
     # to other people in this form, so let's save it
     # Write out to Excel
-#    write_results_to_xls(df, 'all_ref_case_study_data')
+    write_results_to_xls(df, 'all_ref_case_study_data')
 
     # Create a list of the available funders.
     # Easily done by taking the col names of df_studies_by_funder
@@ -308,13 +305,12 @@ def main():
     dict_of_dfs = {}
     
     # Drop all columns that aren't related to the found_in or funder
-    #  in which we're interested, and store them in
-    # a dict of dataframes for later processing
+    #  in which we're interested, and store them in a dict of dataframes for later processing
     for name in all_locator_cols:
         dict_of_dfs[name] = df.dropna(subset=[name], how='all')
 
     # Create summaries of the data based on where the term was found,
-    # in which discipline it was basde, and by who funded it
+    # in which discipline it was based, and by who funded it
     df_summary_found_in = summarise_dfs(dict_of_dfs, found_in_cols, found_in)
     df_summary_funder = summarise_dfs(dict_of_dfs, funder_cols, funder)
 
