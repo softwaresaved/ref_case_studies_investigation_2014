@@ -254,11 +254,6 @@ def main():
     # Associate case study IDs with specific funders
     df = associate_new_data(df, df_studies_by_funder)
 
-    # This is the super dataframe with all information in it. Might be handy
-    # to other people in this form, so let's save it
-    # Write out to Excel
-    write_results_to_xls(df, 'all_ref_case_study_data')
-
     # Create a list of the available funders.
     # Easily done by taking the col names of df_studies_by_funder
     # and removing the Case Study Id item
@@ -288,6 +283,11 @@ def main():
     # this to the list
     found_in_cols.append('found_in_anywhere')
 
+    # This is the super dataframe with all information in it. Might be handy
+    # to other people in this form, so let's save it
+    # Write out to Excel
+    write_results_to_xls(df, 'all_ref_case_study_data')
+
     # Create a new dataframe that only contains case studies that include
     # the search term in them somewhere
     df_software = df.dropna(subset=['found_in_anywhere'], how='all')
@@ -309,8 +309,8 @@ def main():
     for name in all_locator_cols:
         dict_of_dfs[name] = df.dropna(subset=[name], how='all')
 
-    # Create summaries of the data based on where the term was found,
-    # in which discipline it was based, and by who funded it
+    # Create summaries of the data based on where the term was found
+    # and by who funded it
     df_summary_found_in = summarise_dfs(dict_of_dfs, found_in_cols, found_in)
     df_summary_funder = summarise_dfs(dict_of_dfs, funder_cols, funder)
 
@@ -337,9 +337,9 @@ def main():
     # Add a new sublist to add a new plot
     # list should be of the form: [df name, values column, title of chart]
     vanilla_plots = [
-       [df_summary_funder, 'All REF case studies by funder'],
-       [df_summary_found_in, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR + ' by location of word'],
-       [df_summary_software_by_funder, 'REF case studies including the word ' + WORD_TO_SEARCH_FOR + ' by funder']
+       [df_summary_funder, 'all ref case studies by funder'],
+       [df_summary_found_in, 'ref case studies including the word ' + WORD_TO_SEARCH_FOR + ' by location of word'],
+       [df_summary_software_by_funder, 'ref case studies including the word ' + WORD_TO_SEARCH_FOR + ' by funder']
     ]
     
     for count in range(0,len(vanilla_plots)):
