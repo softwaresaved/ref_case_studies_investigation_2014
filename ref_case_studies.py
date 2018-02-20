@@ -152,7 +152,7 @@ def summarise(df, search_places, search_term):
 
     for curr_place in search_places:
         matching = [s for s in cols_list if curr_place in s]
-
+        temp_df = df.dropna(subset=matching, how=all)
 
     return
 
