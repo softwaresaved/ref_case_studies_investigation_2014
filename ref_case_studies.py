@@ -6,13 +6,14 @@ from pandas import ExcelWriter
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+import re
 # This gets the pre-formatted short chart labels from a lookup file
 from chart_label_lookup import short_plot_labels_discipline
 from chart_label_lookup import short_plot_labels_funder
 
 
 # The word we're going to look for - in lowercase please
-WORD_TO_SEARCH_FOR = 'software'
+SEARCH_TERM_LIST = ['software', 'computational', 'computation', 'hpc', 'simulation', 'visualisation', 'visualization', 'python', 'matlab', 'excel', 'github']
 
 # Other global variables
 DATAFILENAME = "./data/CaseStudies.xlsx"
@@ -69,9 +70,9 @@ def cut_to_specific_word(dataframe, specific_word, part_in_bid):
     """
 
     # Cut dataframe down to only those rows with a word in the right column
-    current_df = dataframe[dataframe[part_in_bid].str.contains(specific_word)]
+    current_df = dataframe[dataframe[part_in_bid].str.contains(r'\b' + specific_word + r'\b', regex=True)]
     # Add a new col to indicate where the specific word was found
-    new_col_name = 'found_in_' + part_in_bid
+    new_col_name = specific_word +'_found_in_' + part_in_bid
     current_df[new_col_name] = part_in_bid
     # Drop all columns except the case study and the col showing where the word was found
     current_df = current_df[['Case Study Id', new_col_name]]
@@ -128,6 +129,60 @@ def associate_new_data(dataframe, df_studies_by_funder):
     dataframe = pd.merge(left=dataframe,right=df_studies_by_funder, how='left', left_on='Case Study Id', right_on='Case Study Id')
         
     return dataframe
+
+
+def get_col_list(df, search_string):
+    """
+    Find all cols with a specific string in them
+    :return: a list of cols
+    """
+    list_cols = []
+
+    for current in df.columns:
+        if search_string in current:
+            list_cols.append(current)
+
+    return list_cols
+
+
+def summarise(df, search_places, search_term):
+
+    # Get a list of the cols that need to be searched
+    cols_list = get_col_list(df, search_term)
+
+    for curr_place in search_places:
+        matching = [s for s in cols_list if curr_place in s]
+
+
+    return
+
+
+def count_and_summarise(df, search_string, all_case_study_count):
+    
+    # Get a list of the cols that need to be searched
+    cols_to_search = get_col_list(df, search_string)
+    
+    # Create temp df containing only the cols to be searched and use count() to create a summary series
+    temp_df = df[cols_to_search]
+    s = temp_df.count()
+    
+    # Convert summary series into df
+    df_summary = pd.DataFrame({'index':s.index, 'case studies found':s.values})
+    df_summary.set_index('index', inplace=True)
+
+    # Add a percentage col
+    df_summary['percentage of all studies'] = round((df_summary['case studies found']/all_case_study_count)*100,0)
+
+    return df_summary
+
+
+
+
+
+
+
+
+
 
 
 def col_locator(dataframe, search_term):
@@ -254,19 +309,61 @@ def main():
     # Associate case study IDs with specific funders
     df = associate_new_data(df, df_studies_by_funder)
 
+    # Record length of original df and hence, number of all case studies
+    all_case_study_count = len(df)
+
     # Create a list of the available funders.
     # Easily done by taking the col names of df_studies_by_funder
-    # and removing the Case Study Id item
+    # and removing the Case Study Id items
     list_of_funders = list(df_studies_by_funder.columns)
     list_of_funders.remove('Case Study Id')
 
     # Go through the parts of the bid, and for each one look for the search word, record how
     # many case studies were found to match, then add a new column to identify this location
     # in the original dataframe
-    for part_in_bid in possible_search_places:
-        df_cut = cut_to_specific_word(df, WORD_TO_SEARCH_FOR, part_in_bid)
-        df = merge_search_place(df, df_cut)
+    for word_to_search_for in SEARCH_TERM_LIST:
+        for part_in_bid in possible_search_places:
+            df_cut = cut_to_specific_word(df, word_to_search_for.lower(), part_in_bid)
+            df = merge_search_place(df, df_cut)
 
+    print(df.columns)
+
+    # Get a list of all columns with data related to funders
+    list_of_funders = get_col_list(df, 'funder')
+
+    # Get a list of all columns with data related to where a term was found
+    list_of_found_in = get_col_list(df, 'found')
+    
+    # This is the super dataframe with all information in it. Might be handy
+    # to other people in this form, so let's save it
+#    write_results_to_xls(df, 'all_ref_case_study_data')
+
+    summarise(df, possible_search_places, 'found_in')
+
+
+    # Make life faster by dropping all rows where no search term(s) was found
+    df_term_identified = df.dropna(axis=0, subset=list_of_found_in, how='all')
+    df_term_identified['found_in_anywhere'] = 'anywhere'
+
+    # Write out to Excel
+#    write_results_to_xls(df_term_identified, 'only_case_studies_with_search_term_identified')
+
+
+
+
+    df_summary_found = count_and_summarise(df_term_identified, 'found_in', all_case_study_count)
+
+    df_summary_funders = count_and_summarise(df_term_identified, 'funder', all_case_study_count)
+
+    print(df_summary_found)
+    print(df_summary_funders)    
+    
+    
+    
+    
+    
+
+'''
     # Create some names that will be used to represent strings that are used
     # to identify columns in the analysis
     found_in = 'found_in_'
@@ -283,10 +380,6 @@ def main():
     # this to the list
     found_in_cols.append('found_in_anywhere')
 
-    # This is the super dataframe with all information in it. Might be handy
-    # to other people in this form, so let's save it
-    # Write out to Excel
-    write_results_to_xls(df, 'all_ref_case_study_data')
 
     # Create a new dataframe that only contains case studies that include
     # the search term in them somewhere
@@ -336,17 +429,24 @@ def main():
 
     # Add a new sublist to add a new plot
     # list should be of the form: [df name, values column, title of chart]
+#    vanilla_plots = [
+#       [df_summary_funder, 'all ref case studies by funder'],
+#       [df_summary_found_in, 'ref case studies including the word ' + WORD_TO_SEARCH_FOR + ' by location of word'],
+#       [df_summary_software_by_funder, 'ref case studies including the word ' + WORD_TO_SEARCH_FOR + ' by funder']
+#    ]
+
+
     vanilla_plots = [
        [df_summary_funder, 'all ref case studies by funder'],
-       [df_summary_found_in, 'ref case studies including the word ' + WORD_TO_SEARCH_FOR + ' by location of word'],
-       [df_summary_software_by_funder, 'ref case studies including the word ' + WORD_TO_SEARCH_FOR + ' by funder']
+       [df_summary_found_in, 'located ref case studies by location of word'],
+       [df_summary_software_by_funder, 'located ref case studies by funder']
     ]
     
     for count in range(0,len(vanilla_plots)):
         plot_bar_from_df(vanilla_plots[count][0], 'How many', vanilla_plots[count][1], 'Number')
         plot_bar_from_df(vanilla_plots[count][0], 'percentage', vanilla_plots[count][1] + ' (percentage)', 'Percentage')
         write_results_to_xls(vanilla_plots[count][0], vanilla_plots[count][1])
-
+'''
 
 if __name__ == '__main__':
     main()
