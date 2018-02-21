@@ -16,9 +16,8 @@ from chart_label_lookup import short_plot_labels_funder
 SEARCH_TERM_LIST = ['software', 'computational', 'computation', 'hpc', 'simulation', 'visualisation', 'visualization', 'python', 'matlab', 'excel', 'github']
 
 # Other global variables
-DATAFILENAME = "./data/CaseStudies.xlsx"
+DATAFILENAME = "./data/all_ref_case_study_data.xlsx"
 STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.xlsx"
-STUDIES_BY_DISCIPLINE = "./data/list_of_studies_by_discipline.xlsx"
 EXCEL_RESULT_STORE = "./outputs/"
 CHART_RESULT_STORE = "./outputs/charts/"
 
@@ -32,31 +31,23 @@ def import_xls_to_df(filename, name_of_sheet):
     return pd.read_excel(filename,sheetname=name_of_sheet)
 
 
-def clean(dataframe):
+def write_results_to_xls(dataframe, title):
     """
-    Cleans the imported data for easy processing by removing end of lines chars, multiple spaces,
-    and lowercasing everying
-    :params: a dataframe
-    :return: a dataframe with clean data
+    Takes a dataframe and writes it to an Excel spreadsheet based on a string
+    which describes the save location and title
+    :params: a dataframe, a string containing desired location and title of a Excel spreadsheet
+    :return: nothing (writes an Excel spreadsheet)
     """
-
-    # Someone thought it would be a good idea to add line breaks to the longer strings in Excel
-    # This removes them 
-    dataframe = dataframe.replace(to_replace='\n', value='', regex=True)
-
-    # There are also multiple spaces in the strings. This removes them.
-    dataframe = dataframe.replace('\s+', ' ', regex=True)
     
-    # And now to remove the leading spaces and lowercase everything
-    # Need the try and except because some of the cols have integers
-    for col in dataframe.columns:
-        try:
-            dataframe[col] = dataframe[col].map(lambda x: x.strip())
-            dataframe[col] = dataframe[col].str.lower()
-        except:
-            pass
-            
-    return dataframe
+    filename = title.replace(" ", "_")
+
+    writer = ExcelWriter(EXCEL_RESULT_STORE + filename + '.xlsx')
+    # Write result to Excel
+    dataframe.to_excel(writer, 'Sheet1')
+    # Close Excel writer
+    writer.save()
+
+    return
 
 
 def cut_to_specific_word(dataframe, specific_word, part_in_bid):
@@ -70,7 +61,7 @@ def cut_to_specific_word(dataframe, specific_word, part_in_bid):
     """
 
     # Cut dataframe down to only those rows with a word in the right column
-    current_df = dataframe[dataframe[part_in_bid].str.contains(r'\b' + specific_word + r'\b', regex=True)]
+    current_df = dataframe[dataframe[part_in_bid].str.contains(r'\b' + specific_word + r'\b', regex=True, na=False)]
     # Add a new col to indicate where the specific word was found
     new_col_name = specific_word +'_found_in_' + part_in_bid
     current_df[new_col_name] = part_in_bid
@@ -153,7 +144,7 @@ def summarise(df, search_places, search_term):
     for curr_place in search_places:
         matching = [s for s in cols_list if curr_place in s]
         temp_df = df.dropna(subset=[matching], how='all', axis=0)
-#        print(len(temp_df))
+        print(len(temp_df))
 
     return
 
@@ -175,12 +166,6 @@ def count_and_summarise(df, search_string, all_case_study_count):
     df_summary['percentage of all studies'] = round((df_summary['case studies found']/all_case_study_count)*100,0)
 
     return df_summary
-
-
-
-
-
-
 
 
 
@@ -228,24 +213,6 @@ def summarise_dfs(dict_of_dfs, col_list, remove_string):
 
     return dataframe
 
-
-def write_results_to_xls(dataframe, title):
-    """
-    Takes a dataframe and writes it to an Excel spreadsheet based on a string
-    which describes the save location and title
-    :params: a dataframe, a string containing desired location and title of a Excel spreadsheet
-    :return: nothing (writes an Excel spreadsheet)
-    """
-    
-    filename = title.replace(" ", "_")
-
-    writer = ExcelWriter(EXCEL_RESULT_STORE + filename + '.xlsx')
-    # Write result to Excel
-    dataframe.to_excel(writer, 'Sheet1')
-    # Close Excel writer
-    writer.save()
-
-    return
 
 def relative_percentages(dataframe, df_summary, subject):
     '''
@@ -296,19 +263,14 @@ def main():
     possible_search_places = ['Title', 'Summary of the impact', 'Underpinning research', 'References to the research', 'Details of the impact']
 
     # Import dataframe from original xls
-    df = import_xls_to_df(DATAFILENAME, 'CaseStudies')
-
-    # Clean data
-    df = clean(df)
+    df = import_xls_to_df(DATAFILENAME, 'Sheet1')
+    
+    # Import dataframe from original xls
+    df_studies_by_funder = import_xls_to_df(STUDIES_BY_FUNDER, 'Sheet1')
 
     #Need this list later: used to remove columns relating to original data
     original_cols = list(df.columns)
-
-    # Import case study ids for each funder
-    df_studies_by_funder = import_xls_to_df(STUDIES_BY_FUNDER, 'Sheet1')
     
-    # Associate case study IDs with specific funders
-    df = associate_new_data(df, df_studies_by_funder)
 
     # Record length of original df and hence, number of all case studies
     all_case_study_count = len(df)
