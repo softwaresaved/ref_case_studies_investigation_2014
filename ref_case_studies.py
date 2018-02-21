@@ -152,7 +152,8 @@ def summarise(df, search_places, search_term):
 
     for curr_place in search_places:
         matching = [s for s in cols_list if curr_place in s]
-        temp_df = df.dropna(subset=matching, how=all)
+        temp_df = df.dropna(subset=[matching], how='all', axis=0)
+#        print(len(temp_df))
 
     return
 
@@ -334,10 +335,6 @@ def main():
     # Get a list of all columns with data related to where a term was found
     list_of_found_in = get_col_list(df, 'found')
     
-    # This is the super dataframe with all information in it. Might be handy
-    # to other people in this form, so let's save it
-#    write_results_to_xls(df, 'all_ref_case_study_data')
-
     summarise(df, possible_search_places, 'found_in')
 
 
