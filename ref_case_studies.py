@@ -136,17 +136,35 @@ def get_col_list(df, search_string):
     return list_cols
 
 
-def summarise(df, search_places, search_term):
+def summarise_search_terms(df, search_places, search_term):
+    """
+    Summarise the results across all words searched for
+    
+
+    :returns: a dataframe with the summary results
+    """
+
+    # Add anywhere to the search places, because it's an addition that's not in
+    # the original list
+    search_places.append('anywhere')
 
     # Get a list of the cols that need to be searched
     cols_list = get_col_list(df, search_term)
 
+    summary_data = {}
+
+    # Go through the parts in the study and for each one create a list of
+    # associated columns, then drop any rows where all the columns are NaN
+    # then take the length of the resulting df (which represents how many
+    # times the any of the words were found in that part of the study)
     for curr_place in search_places:
         matching = [s for s in cols_list if curr_place in s]
         temp_df = df.dropna(subset=[matching], how='all', axis=0)
-        print(len(temp_df))
+        summary_data[curr_place] = len(temp_df)
+    
+    summary_df = pd.DataFrame([summary_data], columns=summary_data.keys())
 
-    return
+    return summary_df
 
 
 def count_and_summarise(df, search_string, all_case_study_count):
@@ -166,6 +184,9 @@ def count_and_summarise(df, search_string, all_case_study_count):
     df_summary['percentage of all studies'] = round((df_summary['case studies found']/all_case_study_count)*100,0)
 
     return df_summary
+
+
+
 
 
 
@@ -289,20 +310,26 @@ def main():
             df_cut = cut_to_specific_word(df, word_to_search_for.lower(), part_in_bid)
             df = merge_search_place(df, df_cut)
 
-    print(df.columns)
-
     # Get a list of all columns with data related to funders
     list_of_funders = get_col_list(df, 'funder')
 
     # Get a list of all columns with data related to where a term was found
-    list_of_found_in = get_col_list(df, 'found')
-    
-    summarise(df, possible_search_places, 'found_in')
+    list_of_found_in = get_col_list(df, 'found_in')
 
+    # For ease of calculation later, create a new column which is a summary of the
+    # other found in locations (i.e. found in anywhere)
+    df.loc[df[list_of_found_in].notnull().any(1), 'found_in_anywhere'] = 'anywhere'
+    
+    # Summarise the data across search terms or where they were found
+    df_summary_terms = summarise_search_terms(df, possible_search_places, 'found_in')
+    print(df_summary_terms)
 
     # Make life faster by dropping all rows where no search term(s) was found
     df_term_identified = df.dropna(axis=0, subset=list_of_found_in, how='all')
-    df_term_identified['found_in_anywhere'] = 'anywhere'
+
+
+
+
 
     # Write out to Excel
 #    write_results_to_xls(df_term_identified, 'only_case_studies_with_search_term_identified')
@@ -314,8 +341,8 @@ def main():
 
     df_summary_funders = count_and_summarise(df_term_identified, 'funder', all_case_study_count)
 
-    print(df_summary_found)
-    print(df_summary_funders)    
+#    print(df_summary_found)
+#    print(df_summary_funders)    
     
     
     
