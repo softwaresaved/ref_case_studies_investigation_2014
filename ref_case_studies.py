@@ -247,6 +247,7 @@ def main():
     # other found in locations (i.e. found in anywhere)
     df.loc[df[found_in_cols].notnull().any(1), 'found_in_anywhere'] = 'anywhere'
 
+    # 
     df['search terms found'] = df[found_in_cols].apply(lambda x: x.count(), axis=1)
 
     
