@@ -17,7 +17,9 @@ SEARCH_TERM_LIST = ['software', 'computational', 'computation', 'hpc', 'simulati
 
 # Other global variables
 DATAFILENAME = "./data/all_ref_case_study_data.xlsx"
+#DATAFILENAME = "./data/test_data_only.xlsx"
 STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.xlsx"
+UNITS_OF_ASSESSMENT = "./data/units_of_assessment.xlsx"
 EXCEL_RESULT_STORE = "./outputs/"
 CHART_RESULT_STORE = "./outputs/charts/"
 
@@ -86,29 +88,6 @@ def merge_search_place(dataframe, df_cut):
     return dataframe
 
 
-def write_lengths(how_many_found, possible_search_places):
-    """
-    Takes in a dict containing places in the bid that were searched for a word, and a number
-    of times the word was found in that place. Reorders things based on a list of names that
-    relate to col names. Writes the result to Excel.
-    :params: a dict and a list
-    :return: nothing (writes the result to Excel)
-    """
-    
-    # Convert the dictionary of how many times the word was found
-    # to a dataframe, reorder the columns for prettiness and then write
-    # it to an Excel spreadsheet    
-    how_many_df = pd.DataFrame(how_many_found, index = [0])
-    how_many_df = how_many_df[possible_search_places]
-    
-    #Write the result to Excel
-    writer = ExcelWriter(EXCEL_RESULT_STORE + 'how_many_times_word_was_found.xlsx')
-    how_many_df.to_excel(writer,'Sheet1', index=False)
-    writer.save()
-
-    return
-
-
 def associate_new_data(dataframe, df_studies_by_funder):
     """
     Takes a dataframe with the case study information and merges it with another
@@ -136,20 +115,13 @@ def get_col_list(df, search_string):
     return list_cols
 
 
-def summarise_search_terms(df, search_places, search_term):
+def summarise_search_terms(df, search_places, cols_list, all_case_study_count):
     """
     Summarise the results across all words searched for
     
 
     :returns: a dataframe with the summary results
     """
-
-    # Add anywhere to the search places, because it's an addition that's not in
-    # the original list
-    search_places.append('anywhere')
-
-    # Get a list of the cols that need to be searched
-    cols_list = get_col_list(df, search_term)
 
     summary_data = {}
 
@@ -162,44 +134,55 @@ def summarise_search_terms(df, search_places, search_term):
         temp_df = df.dropna(subset=[matching], how='all', axis=0)
         summary_data[curr_place] = len(temp_df)
     
-    summary_df = pd.DataFrame([summary_data], columns=summary_data.keys())
+    summary_df = pd.DataFrame(list(summary_data.items()), columns=['word location', 'count'])    
+    summary_df.set_index('word location', inplace=True)
+    summary_df['percentage of all studies'] = round(100 * (summary_df['count']/all_case_study_count),0)
+    summary_df.sort_values(['count'], ascending=False, inplace=True)
 
     return summary_df
 
 
-def count_and_summarise(df, search_string, all_case_study_count):
-    
-    # Get a list of the cols that need to be searched
-    cols_to_search = get_col_list(df, search_string)
-    
+def summarise_funders(df, cols_to_search, all_case_study_count):
+        
     # Create temp df containing only the cols to be searched and use count() to create a summary series
     temp_df = df[cols_to_search]
     s = temp_df.count()
     
     # Convert summary series into df
-    df_summary = pd.DataFrame({'index':s.index, 'case studies found':s.values})
+    df_summary = pd.DataFrame({'index':s.index, 'count':s.values})
     df_summary.set_index('index', inplace=True)
+    df_summary.sort_values(['count'], ascending=False, inplace=True)
 
     # Add a percentage col
-    df_summary['percentage of all studies'] = round((df_summary['case studies found']/all_case_study_count)*100,0)
+    df_summary['percentage of all studies'] = round((df_summary['count']/all_case_study_count)*100,0)
 
     return df_summary
 
 
+def summarise_uoas(df, list_of_uoas, all_case_study_count):
+    """
+    Create a summary df of the number of Units of Assessment found in the data
+    """
+    
+    uoa_dict = {}
+
+    for current_uoa in list_of_uoas:
+        temp_df = df[df['Unit of Assessment'].str.contains(current_uoa)]
+        uoa_dict[current_uoa] = len(temp_df)
+
+    summary_df = pd.DataFrame(list(uoa_dict.items()), columns=['unit of assessment', 'count'])    
+    summary_df.set_index('unit of assessment', inplace=True)
+    summary_df['percentage of all studies'] = round(100 * (summary_df['count']/all_case_study_count),0)
+    summary_df.sort_values(['count'], ascending=False, inplace=True)
+
+    return summary_df
 
 
 
 
 
 
-def col_locator(dataframe, search_term):
 
-    located_cols = []
-    term_length = len(search_term)
-    for current in dataframe.columns:
-        if current[:term_length] == search_term:
-            located_cols.append(current)
-    return located_cols
 
 
 def summarise_dfs(dict_of_dfs, col_list, remove_string):
@@ -289,9 +272,12 @@ def main():
     # Import dataframe from original xls
     df_studies_by_funder = import_xls_to_df(STUDIES_BY_FUNDER, 'Sheet1')
 
+    # Import units of assessment from original xls
+    df_uoas = import_xls_to_df(UNITS_OF_ASSESSMENT, 'Sheet1')
+
+
     #Need this list later: used to remove columns relating to original data
     original_cols = list(df.columns)
-    
 
     # Record length of original df and hence, number of all case studies
     all_case_study_count = len(df)
@@ -302,6 +288,10 @@ def main():
     list_of_funders = list(df_studies_by_funder.columns)
     list_of_funders.remove('Case Study Id')
 
+    # Create a list of the units of assessment
+    list_of_uoas = list(df_uoas['Unit of assessment'].str.lower())
+    list_of_uoas.sort()
+
     # Go through the parts of the bid, and for each one look for the search word, record how
     # many case studies were found to match, then add a new column to identify this location
     # in the original dataframe
@@ -311,43 +301,38 @@ def main():
             df = merge_search_place(df, df_cut)
 
     # Get a list of all columns with data related to funders
-    list_of_funders = get_col_list(df, 'funder')
+    funder_cols = get_col_list(df, 'funder')
 
     # Get a list of all columns with data related to where a term was found
-    list_of_found_in = get_col_list(df, 'found_in')
+    found_in_cols = get_col_list(df, 'found_in')
 
     # For ease of calculation later, create a new column which is a summary of the
     # other found in locations (i.e. found in anywhere)
-    df.loc[df[list_of_found_in].notnull().any(1), 'found_in_anywhere'] = 'anywhere'
-    
+    df.loc[df[found_in_cols].notnull().any(1), 'found_in_anywhere'] = 'anywhere'
+
+    # Add anywhere to the search places, because it's an addition that's not in
+    # the original list
+    possible_search_places.append('found_in_anywhere')
+
     # Summarise the data across search terms or where they were found
-    df_summary_terms = summarise_search_terms(df, possible_search_places, 'found_in')
-    print(df_summary_terms)
+    df_summary_terms = summarise_search_terms(df, possible_search_places, found_in_cols, all_case_study_count)
 
     # Make life faster by dropping all rows where no search term(s) was found
-    df_term_identified = df.dropna(axis=0, subset=list_of_found_in, how='all')
+    df_term_identified = df.dropna(axis=0, subset=found_in_cols, how='all')
+    
+    # Get a summary of the data across funders
+    df_summary_funders = summarise_funders(df_term_identified, funder_cols, all_case_study_count)
 
-
-
-
+    df_summary_uoas = summarise_uoas(df_term_identified, list_of_uoas, all_case_study_count)
 
     # Write out to Excel
-#    write_results_to_xls(df_term_identified, 'only_case_studies_with_search_term_identified')
+    write_results_to_xls(df_term_identified, 'only_case_studies_with_search_term_identified')    
+    write_results_to_xls(df_summary_terms, 'summary_of_terms_found')
+    write_results_to_xls(df_summary_funders, 'summary_of_funders')
+    write_results_to_xls(df_summary_uoas, 'summary_of_uoas')
 
 
 
-
-    df_summary_found = count_and_summarise(df_term_identified, 'found_in', all_case_study_count)
-
-    df_summary_funders = count_and_summarise(df_term_identified, 'funder', all_case_study_count)
-
-#    print(df_summary_found)
-#    print(df_summary_funders)    
-    
-    
-    
-    
-    
 
 '''
     # Create some names that will be used to represent strings that are used
