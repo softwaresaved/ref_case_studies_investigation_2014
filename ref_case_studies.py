@@ -16,10 +16,10 @@ from chart_label_lookup import short_plot_labels_funder
 SEARCH_TERM_LIST = ['software', 'computational', 'computation', 'hpc', 'simulation', 'visualisation', 'visualization', 'python', 'matlab', 'excel', 'github']
 
 # Other global variables
-#DATAFILENAME = "./data/all_ref_case_study_data.xlsx"
+DATAFILENAME = "./data/all_ref_case_study_data.xlsx"
 # This is test data set made by randomly deleting 90% of the rows of the real data set
 # It makes life faster when prototyping
-DATAFILENAME = "./data/test_data_only.xlsx"
+# DATAFILENAME = "./data/test_data_only.xlsx"
 STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.xlsx"
 UNITS_OF_ASSESSMENT = "./data/units_of_assessment.xlsx"
 EXCEL_RESULT_STORE = "./outputs/"
@@ -124,8 +124,6 @@ def summarise_search_terms(df, search_places, cols_list, all_case_study_count):
 
     :returns: a dataframe with the summary results
     """
-    
-    print(cols_list)
 
     summary_data = {}
 
@@ -247,10 +245,16 @@ def main():
     # other found in locations (i.e. found in anywhere)
     df.loc[df[found_in_cols].notnull().any(1), 'found_in_anywhere'] = 'anywhere'
 
-    # 
+    # Count the number of terms found in each record
     df['search terms found'] = df[found_in_cols].apply(lambda x: x.count(), axis=1)
 
-    
+    temp = df['search terms found'].unique().tolist()
+    temp.sort()
+
+    print(temp)
+    # 
+    print(len(df[df['search terms found']>=1]))
+    print(len(df[df['search terms found']>=2]))
 
 
     # Add anywhere to the search places, because it's an addition that's not in
