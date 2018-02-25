@@ -18,8 +18,6 @@ I'm making the code open mainly so that the results I publish can be reproduced.
 
 [Notes](#notes)
 
-[Problem number 2](#problem-number-2)
-
 # Prerequisites
 The code requires Python 3. The libraries needed are described in the requirements.txt file.
 
