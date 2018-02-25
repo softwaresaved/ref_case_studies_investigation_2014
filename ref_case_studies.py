@@ -363,7 +363,7 @@ def main():
 
     # Write out to Excel
     export_to_csv(df_term_identified, RESULT_STORE, 'only_case_studies_with_search_term_identified')   
-    export_to_csv(df_summary_terms, RESULT_STORE, 'summary_of_terms_found')
+    export_to_csv(df_summary_terms, RESULT_STORE, 'summary_of_where_terms_found')
     export_to_csv(df_summary_funders, RESULT_STORE, 'summary_of_funders')
     export_to_csv(df_summary_uoas, RESULT_STORE, 'summary_of_uoas')
     export_to_csv(df_summary_popularity, RESULT_STORE, 'summary_of_word_popularity')
