@@ -10,7 +10,7 @@ import math
 
 
 DATA_FILE_DIR = "./data/studies_by_council/"
-OUTPUT = "./data/list_of_studies_by_council.xlsx"
+OUTPUT = "./data/"
 
 
 def read_data():
@@ -63,6 +63,16 @@ def clean(dataframe):
     return dataframe
 
 
+def export_to_csv(df, location, filename):
+    """
+    Exports a df to a csv file
+    :params: a df and a location in which to save it
+    :return: nothing, saves a csv
+    """
+
+    return df.to_csv(location + filename + '.csv')
+
+
 def main():
     """
     Main function to run program
@@ -74,11 +84,8 @@ def main():
     # Clean data
     df = clean(df)
 
-    # Write results to Excel spreadsheet for the shear hell of it
-    writer = ExcelWriter(OUTPUT)
-    df.to_excel(writer,'Sheet1')
-    writer.save()
-
+    # Export data
+    export_to_csv(df, OUTPUT, 'list_of_studies_by_council')
 
 if __name__ == '__main__':
     main()

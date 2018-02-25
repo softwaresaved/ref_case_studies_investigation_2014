@@ -16,7 +16,7 @@ DATAFILENAME = "./data/all_ref_case_study_data.csv"
 # This is test data set made by randomly deleting 90% of the rows of the real data set
 # It makes life faster when prototyping
 #DATAFILENAME = "./data/test_data_only.csv"
-STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.xlsx"
+STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.csv"
 UNITS_OF_ASSESSMENT = "./data/units_of_assessment.xlsx"
 RESULT_STORE = "./outputs/"
 CHART_RESULT_STORE = "./outputs/charts/"
@@ -291,11 +291,11 @@ def main():
     # because it's too uncoupled from the actual case study content
     possible_search_places = ['Title', 'Summary of the impact', 'Underpinning research', 'Details of the impact']
 
-    # Import dataframe from original xls
+    # Import case study data
     df = import_csv_to_df(DATAFILENAME)
     
-    # Import dataframe from original xls
-    df_studies_by_funder = import_xls_to_df(STUDIES_BY_FUNDER, 'Sheet1')
+    # Import case studies by funder
+    df_studies_by_funder = import_csv_to_df(STUDIES_BY_FUNDER)
 
     # Import units of assessment from original xls
     df_uoas = import_xls_to_df(UNITS_OF_ASSESSMENT, 'Sheet1')
