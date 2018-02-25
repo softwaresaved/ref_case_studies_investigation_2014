@@ -6,47 +6,40 @@ from pandas import ExcelWriter
 import numpy as np
 
 # Other global variables
-DATAFILENAME = "./data/all_ref_case_study_data.xlsx"
-EXCEL_RESULT_STORE = "./data/"
+DATAFILENAME = "./data/all_ref_case_study_data.csv"
+RESULT_STORE = "./data/"
+FRACTION_TO_REDUCE = 0.9
 
-def import_xls_to_df(filename, name_of_sheet):
+def import_csv_to_df(filename):
     """
-    Imports an Excel file into a Pandas dataframe
-    :params: get an xls file and a sheetname from that file
+    Imports a csv file into a Pandas dataframe
+    :params: a csv file
     :return: a df
     """
-    return pd.read_excel(filename,sheetname=name_of_sheet)
-
-
-def write_results_to_xls(dataframe, title):
-    """
-    Takes a dataframe and writes it to an Excel spreadsheet based on a string
-    which describes the save location and title
-    :params: a dataframe, a string containing desired location and title of a Excel spreadsheet
-    :return: nothing (writes an Excel spreadsheet)
-    """
     
-    filename = title.replace(" ", "_")
+    return pd.read_csv(filename)
 
-    writer = ExcelWriter(EXCEL_RESULT_STORE + filename + '.xlsx')
-    # Write result to Excel
-    dataframe.to_excel(writer, 'Sheet1')
-    # Close Excel writer
-    writer.save()
 
-    return
+def export_to_csv(df, location, filename):
+    """
+    Exports a df to a csv file
+    :params: a df and a location in which to save it
+    :return: nothing, saves a csv
+    """
+
+    return df.to_csv(location + filename + '.csv')
 
 
 def main():
     
     # Read in the data
-    df = import_xls_to_df(DATAFILENAME, 'Sheet1')
+    df = import_csv_to_df(DATAFILENAME)
     
     # Knock out a fraction (denoted by 'frac') of the rows of the dataframe
-    df2 = df.drop(df.sample(frac=0.9, axis=0).index)
+    df2 = df.drop(df.sample(frac=FRACTION_TO_REDUCE, axis=0).index)
 
     # Save the data
-    write_results_to_xls(df2, 'test_data_only')
+    export_to_csv(df2, RESULT_STORE, 'test_data_only')
     
 if __name__ == '__main__':
     main()

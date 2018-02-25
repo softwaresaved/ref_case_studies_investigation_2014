@@ -12,10 +12,11 @@ import re
 SEARCH_TERM_LIST = ['software', 'computational', 'computation', 'computed', 'hpc', 'simulation', 'simulated', 'visualisation', 'visualization', 'python', 'matlab', 'git', 'spss', 'excel', 'nvivo', 'imagej', 'stata', 'fortran', 'modelling', 'model', 'r language']
 
 # Other global variables
-DATAFILENAME = "./data/all_ref_case_study_data.csv"
-# This is test data set made by randomly deleting 90% of the rows of the real data set
-# It makes life faster when prototyping
+# This is test data set made by randomly deleting 90% of the rows of the real data set. Use it instead of the
+# real data set to make life faster when prototyping
 #DATAFILENAME = "./data/test_data_only.csv"
+# The real data set of all case studies, which should be used when wishing to generate actual results
+DATAFILENAME = "./data/all_ref_case_study_data.csv"
 STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.csv"
 UNITS_OF_ASSESSMENT = "./data/units_of_assessment.csv"
 RESULT_STORE = "./outputs/"
@@ -295,26 +296,25 @@ def main():
     df = import_csv_to_df(DATAFILENAME)
     
     # Import case studies by funder
+    # This is only used to create a list of funders
     df_studies_by_funder = import_csv_to_df(STUDIES_BY_FUNDER)
-
-    # Import units of assessment from original xls
-    df_uoas = import_csv_to_df(UNITS_OF_ASSESSMENT)
-
-    #Need this list later: used to remove columns relating to original data
-    original_cols = list(df.columns)
-
-    # Record length of original df and hence, number of all case studies
-    all_case_study_count = len(df)
-
     # Create a list of the available funders.
     # Easily done by taking the col names of df_studies_by_funder
     # and removing the Case Study Id items
     list_of_funders = list(df_studies_by_funder.columns)
     list_of_funders.remove('Case Study Id')
 
+    # Import units of assessment from original xls
+    df_uoas = import_csv_to_df(UNITS_OF_ASSESSMENT)
     # Create a list of the units of assessment
     list_of_uoas = list(df_uoas['Unit of assessment'].str.lower())
     list_of_uoas.sort()
+
+    #Need this list later: used to remove columns relating to original data
+    original_cols = list(df.columns)
+
+    # Record length of original df and hence, number of all case studies
+    all_case_study_count = len(df)
 
     # Go through the parts of the bid, and for each one look for the search word, record how
     # many case studies were found to match, then add a new column to identify this location
