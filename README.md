@@ -8,17 +8,15 @@ I'm making the code open mainly so that the results I publish can be reproduced.
 
 [Prerequisites](#prerequisites)
 
-[Inputs, outputs and operation](#inputs-outputs-and-operation)
+[Licences](#licences)
 
-[Running the analysis](#running-the-analysis)
+[Inputs, outputs, scripts and other files](#inputs-outputs-and-operation)
 
-[Structure](#structure)
+[Operation](#operation)
 
 [About the data](#about-the-data)
 
-[Data origin](#data-origin)
-
-[Problem number 1](#problem-number-1)
+[Notes](#notes)
 
 [Problem number 2](#problem-number-2)
 
