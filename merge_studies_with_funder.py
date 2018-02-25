@@ -7,7 +7,7 @@ from pandas import ExcelWriter
 # Other global variables
 DATAFILENAME = "./data/CaseStudies.xlsx"
 STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.xlsx"
-EXCEL_RESULT_STORE = "./data/"
+RESULT_STORE = "./data/"
 
 def import_xls_to_df(filename, name_of_sheet):
     """
@@ -58,23 +58,14 @@ def associate_new_data(dataframe, df_studies_by_funder):
     return dataframe
 
 
-def write_results_to_xls(dataframe, title):
+def export_to_csv(df, location, filename):
     """
-    Takes a dataframe and writes it to an Excel spreadsheet based on a string
-    which describes the save location and title
-    :params: a dataframe, a string containing desired location and title of a Excel spreadsheet
-    :return: nothing (writes an Excel spreadsheet)
+    Exports a df to a csv file
+    :params: a df and a location in which to save it
+    :return: nothing, saves a csv
     """
-    
-    filename = title.replace(" ", "_")
 
-    writer = ExcelWriter(EXCEL_RESULT_STORE + filename + '.xlsx')
-    # Write result to Excel
-    dataframe.to_excel(writer, 'Sheet1')
-    # Close Excel writer
-    writer.save()
-
-    return
+    return df.to_csv(location + filename + '.csv')
 
 
 def main():
@@ -98,7 +89,8 @@ def main():
     # Associate case study IDs with specific funders
     df = associate_new_data(df, df_studies_by_funder)
 
-    write_results_to_xls(df, 'all_ref_case_study_data')
+    # Export results
+    export_to_csv(df, RESULT_STORE, 'all_ref_case_study_data')
 
 if __name__ == '__main__':
     main()

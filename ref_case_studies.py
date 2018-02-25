@@ -12,10 +12,10 @@ import re
 SEARCH_TERM_LIST = ['software', 'computational', 'computation', 'computed', 'hpc', 'simulation', 'simulated', 'visualisation', 'visualization', 'python', 'matlab', 'git', 'spss', 'excel', 'nvivo', 'imagej', 'stata', 'fortran', 'modelling', 'model', 'r language']
 
 # Other global variables
-DATAFILENAME = "./data/all_ref_case_study_data.xlsx"
+DATAFILENAME = "./data/all_ref_case_study_data.csv"
 # This is test data set made by randomly deleting 90% of the rows of the real data set
 # It makes life faster when prototyping
-#DATAFILENAME = "./data/test_data_only.xlsx"
+#DATAFILENAME = "./data/test_data_only.csv"
 STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.xlsx"
 UNITS_OF_ASSESSMENT = "./data/units_of_assessment.xlsx"
 RESULT_STORE = "./outputs/"
@@ -270,7 +270,6 @@ def plot_bar_from_df(df, y_col, title, x_axis_title, y_axis_title):
     # This provides more space around the chart to make it prettier        
     plt.tight_layout(True)
     filename = title.replace(" ", "_")
-    print(filename)
     plt.savefig(CHART_RESULT_STORE + filename + '.png', format = 'png', dpi = 150)
     plt.show()
     
@@ -293,7 +292,7 @@ def main():
     possible_search_places = ['Title', 'Summary of the impact', 'Underpinning research', 'Details of the impact']
 
     # Import dataframe from original xls
-    df = import_xls_to_df(DATAFILENAME, 'Sheet1')
+    df = import_csv_to_df(DATAFILENAME)
     
     # Import dataframe from original xls
     df_studies_by_funder = import_xls_to_df(STUDIES_BY_FUNDER, 'Sheet1')
