@@ -17,7 +17,7 @@ DATAFILENAME = "./data/all_ref_case_study_data.csv"
 # It makes life faster when prototyping
 #DATAFILENAME = "./data/test_data_only.csv"
 STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.csv"
-UNITS_OF_ASSESSMENT = "./data/units_of_assessment.xlsx"
+UNITS_OF_ASSESSMENT = "./data/units_of_assessment.csv"
 RESULT_STORE = "./outputs/"
 CHART_RESULT_STORE = "./outputs/charts/"
 
@@ -298,7 +298,7 @@ def main():
     df_studies_by_funder = import_csv_to_df(STUDIES_BY_FUNDER)
 
     # Import units of assessment from original xls
-    df_uoas = import_xls_to_df(UNITS_OF_ASSESSMENT, 'Sheet1')
+    df_uoas = import_csv_to_df(UNITS_OF_ASSESSMENT)
 
     #Need this list later: used to remove columns relating to original data
     original_cols = list(df.columns)
