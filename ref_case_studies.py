@@ -18,7 +18,7 @@ DATAFILENAME = "./data/all_ref_case_study_data.xlsx"
 #DATAFILENAME = "./data/test_data_only.xlsx"
 STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.xlsx"
 UNITS_OF_ASSESSMENT = "./data/units_of_assessment.xlsx"
-EXCEL_RESULT_STORE = "./outputs/"
+RESULT_STORE = "./outputs/"
 CHART_RESULT_STORE = "./outputs/charts/"
 
 
@@ -29,6 +29,26 @@ def import_xls_to_df(filename, name_of_sheet):
     :return: a df
     """
     return pd.read_excel(filename,sheetname=name_of_sheet)
+
+
+def import_csv_to_df(filename):
+    """
+    Imports a csv file into a Pandas dataframe
+    :params: a csv file
+    :return: a df
+    """
+    
+    return pd.read_csv(filename)
+
+
+def export_to_csv(df, location, filename):
+    """
+    Exports a df to a csv file
+    :params: a df and a location in which to save it
+    :return: nothing, saves a csv
+    """
+
+    return df.to_csv(location + filename + '.csv')
 
 
 def write_results_to_xls(dataframe, title):
@@ -343,11 +363,11 @@ def main():
     df_summary_popularity = summarise_word_popularity(df, all_case_study_count)
 
     # Write out to Excel
-    write_results_to_xls(df_term_identified, 'only_case_studies_with_search_term_identified')    
-    write_results_to_xls(df_summary_terms, 'summary_of_terms_found')
-    write_results_to_xls(df_summary_funders, 'summary_of_funders')
-    write_results_to_xls(df_summary_uoas, 'summary_of_uoas')
-    write_results_to_xls(df_summary_popularity, 'summary_of_word_popularity')
+    export_to_csv(df_term_identified, RESULT_STORE, 'only_case_studies_with_search_term_identified')   
+    export_to_csv(df_summary_terms, RESULT_STORE, 'summary_of_terms_found')
+    export_to_csv(df_summary_funders, RESULT_STORE, 'summary_of_funders')
+    export_to_csv(df_summary_uoas, RESULT_STORE, 'summary_of_uoas')
+    export_to_csv(df_summary_popularity, RESULT_STORE, 'summary_of_word_popularity')
 
     plot_bar_from_df(df_summary_popularity, '% of all studies', 'Incidence of search words in REF 2014 case studies', '', 'As percentage of all case studies')
 
