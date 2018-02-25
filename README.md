@@ -1,6 +1,6 @@
 # Investigation of REF case studies
 
-The idea behind this code is to investigate the REF case studies that were recorded in 2014 to find how many reference software and then cross-section the resulting data based on aspects like which funder was involved and what field the research derived from.
+The idea behind this code is to investigate the REF case studies that were recorded in 2014 to find how many reference software by looking for software-related terms in the case studies. The results of this analysis are then summarised to find how many case studies are related to software, which funder was involved and what field the research is derived from.
 
 I'm making the code open mainly so that the results I publish can be reproduced. However, the code could also be re-used if someone is interested in investigating other keywords that appear in the REF case studies.
 
