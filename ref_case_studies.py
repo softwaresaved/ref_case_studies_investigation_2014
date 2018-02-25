@@ -7,19 +7,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import re
-# This gets the pre-formatted short chart labels from a lookup file
-from chart_label_lookup import short_plot_labels_discipline
-from chart_label_lookup import short_plot_labels_funder
-
 
 # The word we're going to look for - in lowercase please
-SEARCH_TERM_LIST = ['software', 'computational', 'computation', 'hpc', 'simulation', 'visualisation', 'visualization', 'python', 'matlab', 'excel', 'github']
+SEARCH_TERM_LIST = ['software', 'computational', 'computation', 'computed', 'hpc', 'simulation', 'simulated', 'visualisation', 'visualization', 'python', 'matlab', 'git', 'spss', 'excel', 'nvivo', 'imagej', 'stata', 'fortran', 'modelling', 'model', 'r language']
 
 # Other global variables
 DATAFILENAME = "./data/all_ref_case_study_data.xlsx"
 # This is test data set made by randomly deleting 90% of the rows of the real data set
 # It makes life faster when prototyping
-# DATAFILENAME = "./data/test_data_only.xlsx"
+#DATAFILENAME = "./data/test_data_only.xlsx"
 STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.xlsx"
 UNITS_OF_ASSESSMENT = "./data/units_of_assessment.xlsx"
 EXCEL_RESULT_STORE = "./outputs/"
@@ -132,15 +128,30 @@ def summarise_search_terms(df, search_places, cols_list, all_case_study_count):
     # then take the length of the resulting df (which represents how many
     # times the any of the words were found in that part of the study)
     for curr_place in search_places:
+        # Get list of cols that match the curr_place
         matching = [s for s in cols_list if curr_place in s]
+        # Drop all rows where NaN across the "matching" list
         temp_df = df.dropna(subset=[matching], how='all', axis=0)
         summary_data[curr_place] = len(temp_df)
     
-    summary_df = pd.DataFrame(list(summary_data.items()), columns=['word location', 'count'])    
-    summary_df.set_index('word location', inplace=True)
-    summary_df['percentage of all studies'] = round(100 * (summary_df['count']/all_case_study_count),0)
-    summary_df.sort_values(['count'], ascending=False, inplace=True)
+    summary_df = pd.DataFrame(list(summary_data.items()), columns=['word location', 'count matching 1 word'])    
+    summary_df['% of all studies'] = round(100 * (summary_df['count matching 1 word']/all_case_study_count),0)
+    summary_df.sort_values(['count matching 1 word'], ascending=False, inplace=True)
 
+    # Now that we've sorted the count for a single word found in the df
+    # see how many words have multiple matches
+    for i in range(2, len(SEARCH_TERM_LIST)+1):
+        shortened_df = df[df['search terms found'] == i]
+        count_plus_i_word = {}
+        for curr_place in search_places:
+            matching = [s for s in cols_list if curr_place in s]
+            temp_df = shortened_df.dropna(subset=[matching], how='all', axis=0)
+            count_plus_i_word[curr_place] = len(temp_df)
+        summary_df['count matching ' + str(i) + ' words'] = summary_df['word location'].map(count_plus_i_word)
+        summary_df['% all studies ' + str(i) + ' words'] = round(100 * (summary_df['count matching ' + str(i) + ' words']/all_case_study_count),0)
+        
+    summary_df.set_index('word location', inplace=True)
+    
     return summary_df
 
 
@@ -177,7 +188,9 @@ def summarise_uoas(df, df_term_found, list_of_uoas, all_case_study_count):
         uoa_term_found_dict[current_uoa] = len(temp_df)
         uoa_all_dict[current_uoa] = len(temp_2_df)
 
+    # Create a df from the dict
     summary_df = pd.DataFrame(list(uoa_term_found_dict.items()), columns=['unit of assessment', 'software reliant count'])    
+    # Add a column to the summary from the uoa_all_dict
     summary_df['all studies count'] = summary_df['unit of assessment'].map(uoa_all_dict)
     summary_df.set_index('unit of assessment', inplace=True)
 
@@ -186,6 +199,63 @@ def summarise_uoas(df, df_term_found, list_of_uoas, all_case_study_count):
     summary_df.sort_values(['software reliant count'], ascending=False, inplace=True)
 
     return summary_df
+
+def summarise_word_popularity(df, all_case_study_count):
+    
+    # Get a list of all the found_in columns
+    matching = [s for s in df.columns if 'found_in' in s]
+    # Remove the any_term part, because it's a summary that we don't need
+    matching.remove('any_term_found_in_anywhere')
+    
+    matches_to_search_term = {}
+    
+    for curr_term in SEARCH_TERM_LIST:
+        curr_term_match = [s for s in matching if curr_term in s]
+        temp_df = df.dropna(subset=[curr_term_match], how='all', axis=0)
+        matches_to_search_term[curr_term] = len(temp_df)
+
+    summary_df = pd.DataFrame(list(matches_to_search_term.items()), columns=['search term', 'count'])    
+    summary_df['% of all studies'] = round(100 * (summary_df['count']/all_case_study_count),0)
+    summary_df.sort_values(['count'], ascending=False, inplace=True)
+    summary_df.set_index('search term', inplace=True)
+
+    return summary_df
+
+
+def plot_bar_from_df(df, y_col, title, x_axis_title, y_axis_title):
+    """
+    Plot a functional, rather than a pretty, chart
+    Pretty charts can be made in the "graphing for presentations code" repo in Github
+    """
+
+
+    ax = df.plot(y = y_col, kind='bar', legend=None)
+    for i, each in enumerate(df.index):
+        y = df.ix[each][y_col]
+        ax.text(i-0.3, y+0.2, int(y))
+
+    plt.tick_params(top='off', bottom='off', left='off', right='off')
+
+    plt.title(title)
+    plt.xlabel(x_axis_title)
+    plt.ylabel(y_axis_title)
+
+    ax.spines['left'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+
+
+    labels = df[y_col].tolist()
+    
+    # This provides more space around the chart to make it prettier        
+    plt.tight_layout(True)
+    filename = title.replace(" ", "_")
+    print(filename)
+    plt.savefig(CHART_RESULT_STORE + filename + '.png', format = 'png', dpi = 150)
+    plt.show()
+    
+    return
+
 
 
 def main():
@@ -243,7 +313,7 @@ def main():
 
     # For ease of calculation later, create a new column which is a summary of the
     # other found in locations (i.e. found in anywhere)
-    df.loc[df[found_in_cols].notnull().any(1), 'found_in_anywhere'] = 'anywhere'
+    df.loc[df[found_in_cols].notnull().any(1), 'any_term_found_in_anywhere'] = 'anywhere'
 
     # Count the number of terms found in each record
     df['search terms found'] = df[found_in_cols].apply(lambda x: x.count(), axis=1)
@@ -251,15 +321,10 @@ def main():
     temp = df['search terms found'].unique().tolist()
     temp.sort()
 
-    print(temp)
-    # 
-    print(len(df[df['search terms found']>=1]))
-    print(len(df[df['search terms found']>=2]))
-
 
     # Add anywhere to the search places, because it's an addition that's not in
     # the original list
-    found_in_cols.append('found_in_anywhere')
+    found_in_cols.append('any_term_found_in_anywhere')
     possible_search_places.append('anywhere')
 
     # Limit to only rows where search term(s) was found
@@ -275,169 +340,17 @@ def main():
     # NOTE: this uses the full dataframe not the df_term_identified one
     df_summary_uoas = summarise_uoas(df, df_term_identified, list_of_uoas, all_case_study_count)
 
+    df_summary_popularity = summarise_word_popularity(df, all_case_study_count)
+
     # Write out to Excel
     write_results_to_xls(df_term_identified, 'only_case_studies_with_search_term_identified')    
     write_results_to_xls(df_summary_terms, 'summary_of_terms_found')
     write_results_to_xls(df_summary_funders, 'summary_of_funders')
     write_results_to_xls(df_summary_uoas, 'summary_of_uoas')
+    write_results_to_xls(df_summary_popularity, 'summary_of_word_popularity')
 
+    plot_bar_from_df(df_summary_popularity, '% of all studies', 'Incidence of search words in REF 2014 case studies', '', 'As percentage of all case studies')
 
-
-
-'''
-
-def summarise_dfs(dict_of_dfs, col_list, remove_string):
-    """
-    Takes a dictionary of dataframes, each of which corresponds to a search term stored in the col_list.
-    Each dataframe has been collapsed so the only rows that exist are ones that include the search term
-    in the appropriate column. This means that the length of the dataframe corresponds to the number
-    of times that search term was found in the super dataframe which was its parent
-    see - cut_to_specific_word
-    Combines the search terms and lengths into a dict which is transformed into a dataframe to make
-    later processing easier. Adds a percentage columns and then sorts the dataframe into ascending order
-    :params: a dict of dfs and a list of columns, a string used to form a name for the resulting dataframe
-    :return: a sorted dataframe
-    """
-    # Need this for later string manipulation
-    length = len(remove_string)
-    
-    dictionary ={}
-    for current in col_list:
-        name = current[length:]
-        df_name = remove_string[:length-1]
-        df_value_name = 'How many'
-        # Length of df corresponds to number of times the search word was found
-        dictionary[name] = len(dict_of_dfs[current])
-            
-    dataframe = pd.DataFrame(list(dictionary.items()), columns=[df_name, df_value_name])
-    # Use the names as the index column rather than the numeric one that's created in
-    # the step above
-    dataframe.set_index([df_name], inplace=True)
-    dataframe['percentage'] = round(100 * (dataframe[df_value_name]/dataframe[df_value_name].sum()),1)
-    dataframe.sort_values([df_value_name], inplace=True)
-
-    return dataframe
-
-
-def relative_percentages(dataframe, df_summary, subject):
-
-    Takes a dataframe and a dataframe with summary data, then creates relative percentages
-    in the first dataframe. In other words, what percentage of case studies from a specific
-    funder included the search term?
-    :params: a dataframe, a dataframe with summary data, a subject that is used to name
-             one of the relative percentages
-    :return: a dataframe with relative percentages
-
-
-    sum_value = df_summary['How many'].sum()
-    dataframe['percentage relative to all case studies'] = round(100 * (dataframe['How many']/sum_value),1)
-    dataframe['percentage relative to case studies from each ' + subject] = round(100 * (dataframe['How many']/df_summary['How many']),1)
-
-    return dataframe
-
-
-def plot_bar_from_df(dataframe, y_col, title, y_axis_title):
-    """
-    :params: 
-    :return: 
-    """
-    dataframe.plot(y = y_col, kind='bar', legend=None)
-    plt.title(title)
-    plt.ylabel(y_axis_title)
-    # This provides more space around the chart to make it prettier        
-    plt.tight_layout(True)
-    filename = title.replace(" ", "_")
-    print(filename)
-    plt.savefig(CHART_RESULT_STORE + filename + '.png', format = 'png', dpi = 150)
-#    plt.show()
-    
-    return
-    
-    
-    
-    # Create some names that will be used to represent strings that are used
-    # to identify columns in the analysis
-    found_in = 'found_in_'
-    funder = 'funder_'
-
-    # Create a list of the cols that hold location data in them
-    found_in_cols = col_locator(df, found_in)
-
-    # For ease of calculation later, create a new column which is a summary of the
-    # other location
-    df.loc[df[found_in_cols].notnull().any(1), 'found_in_anywhere'] = 'anywhere'
-
-    # In the step above, we've added another location column, so add
-    # this to the list
-    found_in_cols.append('found_in_anywhere')
-
-
-    # Create a new dataframe that only contains case studies that include
-    # the search term in them somewhere
-    df_software = df.dropna(subset=['found_in_anywhere'], how='all')
-    
-    # Write out to Excel
-#    write_results_to_xls(df_software, WORD_TO_SEARCH_FOR + '_case_studies_only')
-
-    # Create a list of the cols that hold funder data in them
-    funder_cols = col_locator(df, funder)
-
-    # Create a dict of dataframes, each of which holds the data
-    # related to a specific found_in, or funder
-    # Start by adding the three locator lists together
-    all_locator_cols = found_in_cols + funder_cols
-    dict_of_dfs = {}
-    
-    # Drop all columns that aren't related to the found_in or funder
-    #  in which we're interested, and store them in a dict of dataframes for later processing
-    for name in all_locator_cols:
-        dict_of_dfs[name] = df.dropna(subset=[name], how='all')
-
-    # Create summaries of the data based on where the term was found
-    # and by who funded it
-    df_summary_found_in = summarise_dfs(dict_of_dfs, found_in_cols, found_in)
-    df_summary_funder = summarise_dfs(dict_of_dfs, funder_cols, funder)
-
-    # Now do the same, but based on the df that contains only
-    # case studies related to software
-    dict_of_software_dfs = {}
-    for name in funder_cols:
-        dict_of_software_dfs[name] = df_software.dropna(subset=[name], how='all')
-
-    # Create summaries of the df that contains only case studies
-    # related to software
-    df_summary_software_by_funder = summarise_dfs(dict_of_software_dfs, funder_cols, funder)
-    df_summary_software_by_funder = relative_percentages(df_summary_software_by_funder, df_summary_funder, 'funder')
-
-
-    ########## Prepping for plotting ###############
-        
-    for index_name in df_summary_funder.index.values:
-        df_summary_funder.rename(index={index_name: short_plot_labels_funder[index_name]}, inplace=True)
-        df_summary_software_by_funder.rename(index={index_name: short_plot_labels_funder[index_name]}, inplace=True)
-
-    ############ Plotting #############
-
-    # Add a new sublist to add a new plot
-    # list should be of the form: [df name, values column, title of chart]
-#    vanilla_plots = [
-#       [df_summary_funder, 'all ref case studies by funder'],
-#       [df_summary_found_in, 'ref case studies including the word ' + WORD_TO_SEARCH_FOR + ' by location of word'],
-#       [df_summary_software_by_funder, 'ref case studies including the word ' + WORD_TO_SEARCH_FOR + ' by funder']
-#    ]
-
-
-    vanilla_plots = [
-       [df_summary_funder, 'all ref case studies by funder'],
-       [df_summary_found_in, 'located ref case studies by location of word'],
-       [df_summary_software_by_funder, 'located ref case studies by funder']
-    ]
-    
-    for count in range(0,len(vanilla_plots)):
-        plot_bar_from_df(vanilla_plots[count][0], 'How many', vanilla_plots[count][1], 'Number')
-        plot_bar_from_df(vanilla_plots[count][0], 'percentage', vanilla_plots[count][1] + ' (percentage)', 'Percentage')
-        write_results_to_xls(vanilla_plots[count][0], vanilla_plots[count][1])
-'''
 
 if __name__ == '__main__':
     main()
