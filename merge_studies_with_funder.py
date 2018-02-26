@@ -6,7 +6,7 @@ from pandas import ExcelWriter
 
 # Other global variables
 DATAFILENAME = "./data/CaseStudies.xlsx"
-STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.xlsx"
+STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.csv"
 RESULT_STORE = "./data/"
 
 def import_xls_to_df(filename, name_of_sheet):
@@ -16,6 +16,16 @@ def import_xls_to_df(filename, name_of_sheet):
     :return: a df
     """
     return pd.read_excel(filename,sheetname=name_of_sheet)
+
+
+def import_csv_to_df(filename):
+    """
+    Imports a csv file into a Pandas dataframe
+    :params: a csv file
+    :return: a df
+    """
+    
+    return pd.read_csv(filename)
 
 
 def clean(dataframe):
@@ -28,7 +38,7 @@ def clean(dataframe):
 
     # Someone thought it would be a good idea to add line breaks to the longer strings in Excel
     # This removes them 
-    dataframe = dataframe.replace(to_replace='\n', value='', regex=True)
+    dataframe = dataframe.replace(to_replace='\n', value=' ', regex=True)
 
     # There are also multiple spaces in the strings. This removes them.
     dataframe = dataframe.replace('\s+', ' ', regex=True)
@@ -84,7 +94,7 @@ def main():
     df = clean(df)
 
     # Import case study ids for each funder
-    df_studies_by_funder = import_xls_to_df(STUDIES_BY_FUNDER, 'Sheet1')
+    df_studies_by_funder = import_csv_to_df(STUDIES_BY_FUNDER)
     
     # Associate case study IDs with specific funders
     df = associate_new_data(df, df_studies_by_funder)

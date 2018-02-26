@@ -9,7 +9,7 @@ import math
 import re
 
 # The word we're going to look for - in lowercase please
-SEARCH_TERM_LIST = ['software', 'computational', 'computation', 'computed', 'hpc', 'simulation', 'simulated', 'visualisation', 'visualization', 'python', 'matlab', 'git', 'spss', 'excel', 'nvivo', 'imagej', 'stata', 'fortran', 'modelling', 'model', 'r language']
+SEARCH_TERM_LIST = ['software', 'computational', 'computation', 'computed', 'computer', 'hpc', 'simulation', 'simulated', 'visualisation', 'visualization', 'python', 'matlab', 'git', 'spss', 'excel', 'nvivo', 'imagej', 'stata', 'fortran', 'modelling', 'model', 'r language']
 
 # Other global variables
 # This is test data set made by randomly deleting 90% of the rows of the real data set. Use it instead of the

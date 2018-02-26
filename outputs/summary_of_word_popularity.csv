@@ -1,12 +1,13 @@
 search term,count,% of all studies
-model,2698,41.0
-modelling,1063,16.0
-software,943,14.0
+model,2701,41.0
+modelling,1064,16.0
+software,946,14.0
+computer,678,10.0
 simulation,367,6.0
-computation,314,5.0
-computational,280,4.0
+computation,315,5.0
+computational,281,4.0
 visualisation,147,2.0
-simulated,100,2.0
+simulated,101,2.0
 computed,44,1.0
 visualization,27,0.0
 excel,27,0.0

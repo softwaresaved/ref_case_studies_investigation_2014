@@ -1,16 +1,16 @@
 index,count,percentage of all studies
-funder_epsrc,696,10.0
-funder_esrc,405,6.0
-funder_royal_society,289,4.0
-funder_ahrc,244,4.0
-funder_mrc,217,3.0
-funder_nerc,190,3.0
-funder_wellcome,184,3.0
-funder_bbsrc,112,2.0
-funder_rcuk,112,2.0
-funder_british_academy,107,2.0
+funder_epsrc,722,11.0
+funder_esrc,413,6.0
+funder_royal_society,300,5.0
+funder_ahrc,261,4.0
+funder_mrc,224,3.0
+funder_wellcome,194,3.0
+funder_nerc,192,3.0
+funder_bbsrc,117,2.0
+funder_rcuk,115,2.0
+funder_british_academy,112,2.0
 funder_stfc,55,1.0
-funder_royal_academy_engineering,36,1.0
+funder_royal_academy_engineering,39,1.0
 funder_pparc,18,0.0
 funder_uk_space_agency,17,0.0
 funder_cclrc,4,0.0
