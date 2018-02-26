@@ -25,12 +25,15 @@ SEARCH_TERM_LIST = [
     'high performance computing',
     'hpc',
     'imagej',
+    'implemented in',
     'in silico',
     'matlab',
     'model',
     'modeling',
     'modelling',
     'nvivo',
+    'open source',
+    'open-source',
     'python',
     'quantitative',
     'r language',
@@ -42,5 +45,11 @@ SEARCH_TERM_LIST = [
     'stata',
     'supercomputing',
     'visualisation',
-    'visualization'
+    'visualization',
+    'Rcpp',
+    'ggplot2',
+    'plyr',
+    'stringr',
+    'reshape2',
+    'RColorBrewer'
     ]
