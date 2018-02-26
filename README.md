@@ -43,7 +43,7 @@ All inputs are stored in the data dir
 
 ## Outputs
 
-All outputs are stored in /outputs
+All outputs are stored in outputs dir
 
 1. charts dir: store for all charts as pngs
 1. only_case_studies_with_search_term_identified.csv: derived from all_ref_case_study_data.csv, but only containing the software-related case studies (i.e. the case studies where at least one search term was matched)
@@ -68,10 +68,10 @@ requirements.txt
 
 # Operation
 
-1. Set the list of words you want to find in the case studies in in the WORD_TO_SEARCH_FOR variable
+1. Set the list of words you want to find in the case studies in in the SEARCH_TERM_LIST variable
 1. Data is cleaned (made lower case, line breaks within cells are removed, multiple spaces replaced with single space)
-1. The WORD_TO_SEARCH_FOR are searched for in the different parts of each case study as listed in the possible_search_places variable (I don't include the "References" section because it's not directly linked to the case study and hence is likely to create false positives). Matching case studies are identified in new columns added to the dataframe
-1. A new dataframe containing only case studies in which the WORD_TO_SEARCH_FOR has been found is created and saved as only_case_studies_with_search_term_identified.csv
+1. The SEARCH_TERM_LIST are searched for in the different parts of each case study as listed in the possible_search_places variable (I don't include the "References" section because it's not directly linked to the case study and hence is likely to create false positives). Matching case studies are identified in new columns added to the dataframe
+1. A new dataframe containing only case studies in which the SEARCH_TERM_LIST has been found is created and saved as only_case_studies_with_search_term_identified.csv
 1. The data is summarised and the summaries are saved.
 
 ## Running the analysis
