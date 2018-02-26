@@ -43,7 +43,7 @@ All inputs are stored in the data dir
 
 ## Outputs
 
-All outputs are stored in outputs dir
+All outputs are stored in the outputs dir
 
 1. charts dir: store for all charts as pngs
 1. only_case_studies_with_search_term_identified.csv: derived from all_ref_case_study_data.csv, but only containing the software-related case studies (i.e. the case studies where at least one search term was matched)
