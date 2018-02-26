@@ -52,13 +52,14 @@ All outputs are stored in the outputs dir
 1. summary_of_uoas.csv: a count of software-related case studies split by unit of assessment (i.e. discipline)
 1. summary_of_word_popularity.csv: a count of how many times each search term was matched to the case studies
 
-## Scripts
+## Scripts and look ups
 
 Two scripts were written to include funder data in the case studies. The reason why this is necessary is described [below](#note-1).
 
 1. organise_studies_by_funder.py: runs through the files in studies_by_council dir to create list_of_studies_by_council.csv
-1. merge_studies_with_funder.py: combines the CaseStudies.xlsx and list_of_studies_by_council.csv to produce all_ref_case_study_data.csv
+1. merge_studies_with_funder.py: combines the CaseStudies.xlsx and list_of_studies_by_council.csv, then cleans the data (make all lower case, line breaks within cells and multiple spaces replaced with single space) to produce all_ref_case_study_data.csv
 1. reduce_df_for_test.py: reduces all_ref_case_study_data.csv by a fraction (set in FRACTION_TO_REDUCE) to produce an appropriately smaller data set (test_data_only.csv) for faster execution of scripts whislt testing changes
+1. search_terms.py: the look up file that contains the search terms used to identify software-related case studies
 1. ref_case_studies.py: the main script. Finds the search terms in the case studies and produces the summary data and charts
 requirements.txt
 
@@ -68,11 +69,10 @@ requirements.txt
 
 # Operation
 
-1. Set the list of words you want to find in the case studies in in the SEARCH_TERM_LIST variable
-1. Data is cleaned (made lower case, line breaks within cells are removed, multiple spaces replaced with single space)
+1. Set the list of words you want to find in the case studies by opening search_terms.py and adding words to the SEARCH_TERM_LIST variable
 1. The SEARCH_TERM_LIST are searched for in the different parts of each case study as listed in the possible_search_places variable (I don't include the "References" section because it's not directly linked to the case study and hence is likely to create false positives). Matching case studies are identified in new columns added to the dataframe
 1. A new dataframe containing only case studies in which the SEARCH_TERM_LIST has been found is created and saved as only_case_studies_with_search_term_identified.csv
-1. The data is summarised and the summaries are saved.
+1. The data is summarised and the summaries are saved
 
 ## Running the analysis
 
