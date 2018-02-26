@@ -1,23 +1,38 @@
 search term,count,% of all studies
-model,2701,41.0
+model,2708,41.0
 modelling,1064,16.0
 software,946,14.0
 computer,678,10.0
+quantitative,587,9.0
+database,568,9.0
 simulation,367,6.0
 computation,315,5.0
 computational,281,4.0
+data analysis,192,3.0
 visualisation,147,2.0
 simulated,101,2.0
+gis,92,1.0
+graphics,69,1.0
+in r,59,1.0
+modeling,55,1.0
 computed,44,1.0
 visualization,27,0.0
 excel,27,0.0
+big data,26,0.0
 matlab,24,0.0
 hpc,20,0.0
+high performance computing,19,0.0
+data base,17,0.0
+supercomputing,13,0.0
+in silico,12,0.0
+geographic information systems,11,0.0
 python,9,0.0
 fortran,8,0.0
+git,6,0.0
 spss,6,0.0
+github,5,0.0
 imagej,2,0.0
-git,2,0.0
 stata,1,0.0
 r language,1,0.0
 nvivo,0,0.0
+geographic information science,0,0.0

@@ -8,8 +8,7 @@ import matplotlib.pyplot as plt
 import math
 import re
 
-# The word we're going to look for - in lowercase please
-SEARCH_TERM_LIST = ['software', 'computational', 'computation', 'computed', 'computer', 'hpc', 'simulation', 'simulated', 'visualisation', 'visualization', 'python', 'matlab', 'git', 'spss', 'excel', 'nvivo', 'imagej', 'stata', 'fortran', 'modelling', 'model', 'r language']
+from search_terms import SEARCH_TERM_LIST
 
 # Other global variables
 # This is test data set made by randomly deleting 90% of the rows of the real data set. Use it instead of the
@@ -286,7 +285,7 @@ def main():
     change the global variable found at the very start of
     the program called WORD_TO_SEARCH_FOR
     """
-    
+
     # A list of the different parts of the case study (i.e. columns) in which
     # we want to search. I've removed 'References to the research' from the list
     # because it's too uncoupled from the actual case study content
