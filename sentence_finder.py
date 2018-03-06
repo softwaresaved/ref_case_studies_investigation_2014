@@ -63,14 +63,28 @@ def find_terms_and_context(df, term_of_focus, search_places):
     # Limit df to just the rows where a term_of_focus has been found
     focus_df = df.dropna(subset=[cols_to_keep], how='all', axis=0)
 
-    for index, row in df.iterrows():
+    # Go through each row of the df
+    for index, row in focus_df.iterrows():
+        # Construct a col header in which we will find a word if that word exists in that col
         for current in search_places:
             col_to_check = term_of_focus + '_found_in_' + current
+            # If the entry in the col_to_check row is not nan, then investigate further
             if isinstance(row[col_to_check], str):
+                # Set variable to change how much text should be printed
+                # around term of focus
+                offset = 70
+                # Get the actual text
+                whole_string = row[current]
+                how_many = whole_string.split().count(term_of_focus)
+                print(whole_string)
                 print()
-                print(term_of_focus + ' found in ' + current)
+                print(term_of_focus + ' found in ' + current + ' ' + str(how_many) + ' times')
                 print()
-                print(row[current])
+                start_index = whole_string.find(term_of_focus)
+                end_index = start_index + len(term_of_focus)
+                print('...' + whole_string[(start_index-offset):(end_index+offset)] + '...')
+#                print(str(start_index) + ' ' + str(end_index))
+#                print(row[current])
 
 
     
