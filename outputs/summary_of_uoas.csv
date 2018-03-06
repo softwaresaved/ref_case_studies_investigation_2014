@@ -1,37 +1,37 @@
 unit of assessment,software reliant count,all studies count,percentage of studies in this uoa,percentage of all studies
-business and management studies,289,410,70.0,4.0
-computer science and informatics,241,248,97.0,4.0
-history,239,494,48.0,4.0
-"allied health professions, dentistry, nursing and pharmacy",202,342,59.0,3.0
-mathematical sciences,201,209,96.0,3.0
-general engineering,195,239,82.0,3.0
-"psychology, psychiatry and neuroscience",173,316,55.0,3.0
-clinical medicine,172,383,45.0,3.0
-"geography, environmental studies and archaeology",164,235,70.0,2.0
-biological sciences,146,257,57.0,2.0
-"art and design: history, practice and theory",137,231,59.0,2.0
-education,132,215,61.0,2.0
-earth systems and environmental sciences,126,171,74.0,2.0
-physics,122,181,67.0,2.0
-english language and literature,112,280,40.0,2.0
-social work and social policy,109,186,59.0,2.0
-"public health, health services and primary care",105,163,64.0,2.0
-"architecture, built environment and planning",104,140,74.0,2.0
-law,95,216,44.0,1.0
-modern languages and linguistics,94,190,49.0,1.0
-"electrical and electronic engineering, metallurgy and materials",91,126,72.0,1.0
+business and management studies,296,410,72.0,4.0
+history,245,494,50.0,4.0
+computer science and informatics,243,248,98.0,4.0
+"allied health professions, dentistry, nursing and pharmacy",212,342,62.0,3.0
+mathematical sciences,203,209,97.0,3.0
+general engineering,198,239,83.0,3.0
+clinical medicine,187,383,49.0,3.0
+"psychology, psychiatry and neuroscience",176,316,56.0,3.0
+"geography, environmental studies and archaeology",168,235,71.0,3.0
+biological sciences,157,257,61.0,2.0
+"art and design: history, practice and theory",138,231,60.0,2.0
+education,134,215,62.0,2.0
+earth systems and environmental sciences,127,171,74.0,2.0
+physics,126,181,70.0,2.0
+english language and literature,117,280,42.0,2.0
+"architecture, built environment and planning",112,140,80.0,2.0
+law,111,216,51.0,2.0
+social work and social policy,111,186,60.0,2.0
+"public health, health services and primary care",111,163,68.0,2.0
+modern languages and linguistics,97,190,51.0,1.0
+"electrical and electronic engineering, metallurgy and materials",95,126,75.0,1.0
+"aeronautical, mechanical, chemical and manufacturing engineering",92,119,77.0,1.0
 "music, drama, dance and performing arts",89,194,46.0,1.0
-"aeronautical, mechanical, chemical and manufacturing engineering",89,119,75.0,1.0
-politics and international studies,71,166,43.0,1.0
-chemistry,70,125,56.0,1.0
-economics and econometrics,69,98,70.0,1.0
-"sport and exercise sciences, leisure and tourism",65,122,53.0,1.0
-"agriculture, veterinary and food science",62,125,50.0,1.0
-sociology,47,97,48.0,1.0
-philosophy,40,98,41.0,1.0
-civil and construction engineering,40,51,78.0,1.0
+chemistry,74,125,59.0,1.0
+politics and international studies,73,166,44.0,1.0
+economics and econometrics,72,98,73.0,1.0
+"sport and exercise sciences, leisure and tourism",68,122,56.0,1.0
+"agriculture, veterinary and food science",64,125,51.0,1.0
+sociology,49,97,51.0,1.0
+civil and construction engineering,43,51,84.0,1.0
+philosophy,42,98,43.0,1.0
+classics,37,59,63.0,1.0
 anthropology and development studies,36,80,45.0,1.0
-classics,36,59,61.0,1.0
-theology and religious studies,27,75,36.0,0.0
+theology and religious studies,29,75,39.0,0.0
 area studies,19,68,28.0,0.0
 "communication, cultural and media studies, library and information management ",0,0,,0.0

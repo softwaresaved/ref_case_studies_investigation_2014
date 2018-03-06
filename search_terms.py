@@ -6,7 +6,10 @@ Here's the list of words used to search the REF case studies
 """
 
 SEARCH_TERM_LIST = [
+    'algorithm',
     'big data',
+    'beautifulsoup',
+    'code',
     'computation',
     'computational',
     'computed',
@@ -28,21 +31,29 @@ SEARCH_TERM_LIST = [
     'implemented in',
     'in silico',
     'matlab',
+    'matplotlib',
     'model',
     'modeling',
     'modelling',
+    'numpy',
     'nvivo',
     'open source',
     'open-source',
+    'pipeline',
     'python',
     'quantitative',
+    'regression',
     'r language',
     'in r',
+    'scrapy',
+    'scipy',
     'simulated',
     'simulation',
     'software',
     'spss',
+    'sqlalchemy',
     'stata',
+    'statistical'
     'supercomputing',
     'visualisation',
     'visualization',
@@ -51,5 +62,7 @@ SEARCH_TERM_LIST = [
     'plyr',
     'stringr',
     'reshape2',
-    'RColorBrewer'
+    'RColorBrewer',
+    'workflow',
+    'wxpython'
     ]
