@@ -6,6 +6,7 @@ from pandas import ExcelWriter
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+import string
 import re
 
 from search_terms import SEARCH_TERM_LIST
@@ -75,8 +76,13 @@ def find_terms_and_context(df, term_of_focus, search_places):
                 offset = 70
                 # Get the actual text
                 whole_string = row[current]
-                how_many = whole_string.split().count(term_of_focus)
-                print(whole_string)
+                # The next two lines remove punctionation from the string
+                regex = re.compile('[%s]' % re.escape(string.punctuation))
+                cleaned_string = regex.sub(' ', whole_string)
+                # Now find how many times the term appears in the sentence
+                # the split allows us to find only the word bracketed by spaces
+                how_many = cleaned_string.split().count(term_of_focus)
+#                print(whole_string)
                 print()
                 print(term_of_focus + ' found in ' + current + ' ' + str(how_many) + ' times')
                 print()
