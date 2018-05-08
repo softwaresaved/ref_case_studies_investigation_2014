@@ -232,13 +232,6 @@ def plot_bar_from_df(df, y_col, title, x_axis_title, y_axis_title):
 
 
 def main():
-    """Main function to run program.
-
-    To change the word searched for in the case studies,
-    change the global variable found at the very start of
-    the program called WORD_TO_SEARCH_FOR
-    """
-
     # A list of the different parts of the case study (i.e. columns) in which
     # we want to search. I've removed 'References to the research' from the list
     # because it's too uncoupled from the actual case study content
