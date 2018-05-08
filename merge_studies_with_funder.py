@@ -5,9 +5,9 @@ import pandas as pd
 from pandas import ExcelWriter
 
 # Other global variables
-DATAFILENAME = "./data/CaseStudies.xlsx"
-STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.csv"
-RESULT_STORE = "./data/"
+DATAFILENAME = "input/raw/CaseStudies.xlsx"
+STUDIES_BY_FUNDER = "input/generated/list_of_studies_by_council.csv"
+RESULT_STORE = "input/generated/"
 
 def import_xls_to_df(filename, name_of_sheet):
     """

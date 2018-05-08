@@ -9,8 +9,8 @@ import os.path
 import math
 
 
-DATA_FILE_DIR = "./data/studies_by_council/"
-OUTPUT = "./data/"
+DATA_FILE_DIR = "input/raw/studies_by_council/"
+OUTPUT = "input/generated/"
 
 
 def read_data():

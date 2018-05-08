@@ -12,9 +12,9 @@ import re
 from search_terms import SEARCH_TERM_LIST
 
 # Other global variables
-DATAFILENAME = "./outputs/only_case_studies_with_search_term_identified.csv"
-RESULT_STORE = "./outputs/"
-CHART_RESULT_STORE = "./outputs/charts/"
+DATAFILENAME = "outputs/only_case_studies_with_search_term_identified.csv"
+RESULT_STORE = "outputs/"
+CHART_RESULT_STORE = "outputs/charts/"
 
 
 def import_csv_to_df(filename):

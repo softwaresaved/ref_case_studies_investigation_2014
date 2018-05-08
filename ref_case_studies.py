@@ -9,13 +9,13 @@ from search_terms import SEARCH_TERM_LIST
 # Other global variables
 # This is test data set made by randomly deleting 90% of the rows of the real data set. Use it instead of the
 # real data set to make life faster when prototyping
-#DATAFILENAME = "./data/test_data_only.csv"
+#DATAFILENAME = "input/generated/test_data_only.csv"
 # The real data set of all case studies, which should be used when wishing to generate actual results
-DATAFILENAME = "./data/all_ref_case_study_data.csv"
-STUDIES_BY_FUNDER = "./data/list_of_studies_by_council.csv"
-UNITS_OF_ASSESSMENT = "./data/units_of_assessment.csv"
-RESULT_STORE = "./outputs/"
-CHART_RESULT_STORE = "./outputs/charts/"
+DATAFILENAME = "input/generated/all_ref_case_study_data.csv"
+STUDIES_BY_FUNDER = "input/generated/list_of_studies_by_council.csv"
+UNITS_OF_ASSESSMENT = "input/raw/units_of_assessment.csv"
+RESULT_STORE = "outputs/"
+CHART_RESULT_STORE = "outputs/charts/"
 
 
 def import_csv_to_df(filename):
