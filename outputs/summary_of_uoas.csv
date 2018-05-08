@@ -1,37 +1,37 @@
 unit of assessment,software reliant count,all studies count,percentage of studies in this uoa,percentage of all studies
-business and management studies,296,410,72.0,4.0
-history,245,494,50.0,4.0
-computer science and informatics,243,248,98.0,4.0
-"allied health professions, dentistry, nursing and pharmacy",212,342,62.0,3.0
-mathematical sciences,203,209,97.0,3.0
-general engineering,198,239,83.0,3.0
-clinical medicine,187,383,49.0,3.0
-"psychology, psychiatry and neuroscience",176,316,56.0,3.0
-"geography, environmental studies and archaeology",168,235,71.0,3.0
-biological sciences,157,257,61.0,2.0
-"art and design: history, practice and theory",138,231,60.0,2.0
-education,134,215,62.0,2.0
-earth systems and environmental sciences,127,171,74.0,2.0
-physics,126,181,70.0,2.0
-english language and literature,117,280,42.0,2.0
-"architecture, built environment and planning",112,140,80.0,2.0
-law,111,216,51.0,2.0
-social work and social policy,111,186,60.0,2.0
-"public health, health services and primary care",111,163,68.0,2.0
-modern languages and linguistics,97,190,51.0,1.0
-"electrical and electronic engineering, metallurgy and materials",95,126,75.0,1.0
-"aeronautical, mechanical, chemical and manufacturing engineering",92,119,77.0,1.0
-"music, drama, dance and performing arts",89,194,46.0,1.0
-chemistry,74,125,59.0,1.0
-politics and international studies,73,166,44.0,1.0
-economics and econometrics,72,98,73.0,1.0
-"sport and exercise sciences, leisure and tourism",68,122,56.0,1.0
-"agriculture, veterinary and food science",64,125,51.0,1.0
-sociology,49,97,51.0,1.0
-civil and construction engineering,43,51,84.0,1.0
-philosophy,42,98,43.0,1.0
-classics,37,59,63.0,1.0
-anthropology and development studies,36,80,45.0,1.0
-theology and religious studies,29,75,39.0,0.0
-area studies,19,68,28.0,0.0
+computer science and informatics,244,248,98.0,4.0
+mathematical sciences,201,209,96.0,3.0
+general engineering,189,239,79.0,3.0
+business and management studies,173,410,42.0,3.0
+history,165,494,33.0,2.0
+clinical medicine,124,383,32.0,2.0
+"geography, environmental studies and archaeology",123,235,52.0,2.0
+"allied health professions, dentistry, nursing and pharmacy",114,342,33.0,2.0
+"psychology, psychiatry and neuroscience",107,316,34.0,2.0
+physics,107,181,59.0,2.0
+earth systems and environmental sciences,105,171,61.0,2.0
+biological sciences,103,257,40.0,2.0
+"art and design: history, practice and theory",86,231,37.0,1.0
+"electrical and electronic engineering, metallurgy and materials",83,126,66.0,1.0
+"public health, health services and primary care",81,163,50.0,1.0
+"aeronautical, mechanical, chemical and manufacturing engineering",77,119,65.0,1.0
+"architecture, built environment and planning",75,140,54.0,1.0
+education,67,215,31.0,1.0
+english language and literature,63,280,22.0,1.0
+modern languages and linguistics,56,190,29.0,1.0
+"music, drama, dance and performing arts",54,194,28.0,1.0
+chemistry,51,125,41.0,1.0
+economics and econometrics,49,98,50.0,1.0
+social work and social policy,43,186,23.0,1.0
+"agriculture, veterinary and food science",40,125,32.0,1.0
+law,39,216,18.0,1.0
+"sport and exercise sciences, leisure and tourism",39,122,32.0,1.0
+civil and construction engineering,37,51,73.0,1.0
+sociology,33,97,34.0,0.0
+classics,25,59,42.0,0.0
+politics and international studies,24,166,14.0,0.0
+philosophy,21,98,21.0,0.0
+anthropology and development studies,17,80,21.0,0.0
+area studies,11,68,16.0,0.0
+theology and religious studies,11,75,15.0,0.0
 "communication, cultural and media studies, library and information management ",0,0,,0.0

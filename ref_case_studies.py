@@ -62,21 +62,6 @@ def cut_to_specific_word(dataframe, specific_word, part_in_bid):
     return current_df
 
 
-def merge_search_place(dataframe, df_cut):
-    """
-    Takes in a dataframe with all case studies information, and a second that contains the case
-    study IDs that relate to a search word found in a specific part of the case study,
-    the Title, for example. These are merged to produce a dataframe with all the case
-    study information and where a specific word was found in the case study
-    :params: two dataframes
-    :return: a dataframe created by merging the two dataframes
-    """
-
-    dataframe = pd.merge(left=dataframe, right=df_cut, how='left', left_on='Case Study Id', right_on='Case Study Id')
-
-    return dataframe
-
-
 def associate_new_data(dataframe, df_studies_by_funder):
     """Merge two dataframes based on Case Study ID.
 
@@ -84,7 +69,7 @@ def associate_new_data(dataframe, df_studies_by_funder):
     dataframe that contains case study IDs and some other data (e.g. funders, disciplines)
 
     :params: a dataframe with case study information, a second dataframe with cases study IDs and other information
-    :return: a dataframe containing case study information and other information
+    :return: a dataframe containing case study information and other merged information
     """
 
     dataframe = pd.merge(left=dataframe, right=df_studies_by_funder, how='left', left_on='Case Study Id', right_on='Case Study Id')
@@ -225,8 +210,8 @@ def plot_bar_from_df(df, y_col, title, x_axis_title, y_axis_title):
 
     ax = df.plot(y=y_col, kind='bar', legend=None)
     for i, each in enumerate(df.index):
-        y = df.ix[each][y_col]
-        ax.text(i-0.3, y+0.2, int(y))
+        y_val = df.ix[each][y_col]
+        ax.text(i-0.3, y_val+0.2, int(y_val))
 
     plt.tick_params(top='off', bottom='off', left='off', right='off')
 
@@ -286,7 +271,7 @@ def main():
     for word_to_search_for in SEARCH_TERM_LIST:
         for part_in_bid in possible_search_places:
             df_cut = cut_to_specific_word(df, word_to_search_for.lower(), part_in_bid)
-            df = merge_search_place(df, df_cut)
+            df = associate_new_data(df, df_cut)
 
     # Get a list of all columns with data related to funders
     funder_cols = get_col_list(df, 'funder')
