@@ -62,7 +62,7 @@ The first two scripts below were written to include funder data in the case stud
 1. `organise_studies_by_funder.py`: runs through the files in the `studies_by_council` directory to create `list_of_studies_by_council.csv`
 1. `merge_studies_with_funder.py`: combines `CaseStudies.xlsx` and `list_of_studies_by_council.csv`, then cleans the data (make all lower case, line breaks within cells and multiple spaces replaced with single space) to produce `all_ref_case_study_data.csv`
 1. `reduce_df_for_test.py`: reduces `all_ref_case_study_data.csv` by a fraction (set in `FRACTION_TO_REDUCE`) to produce an appropriately smaller data set (`test_data_only.csv`) for faster execution of scripts whilst testing changes
-1. `search_terms.py`: the look up file that contains the search terms used to identify software-related case studies
+1. `lib/policy_common_data`: a git submodule that is used to access the search terms for identifying software-related case studies
 1. `ref_case_studies.py`: the main script. Finds the search terms in the case studies and produces the summary data and charts
 
 ## Other files
@@ -70,6 +70,12 @@ The first two scripts below were written to include funder data in the case stud
 1. `requirements.txt`: contains the Python libraries needed by the scripts
 
 # Operation
+
+## Cloning the policy_common_data submodule
+
+Once this repository has been cloned, the `policy_common_data` submodule needs to also be cloned:
+
+```git submodule update --init --recursive```
 
 ## (Optional) Running the preprocess steps
 
