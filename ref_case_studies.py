@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+import os
+import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from search_terms import SEARCH_TERM_LIST
+# Add search terms from policy_common_data submodule repo
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "lib", "policy_common_data"))
+from commondata.softwaresearchterms import SoftwareSearchTerms
 
 # Other global variables
 # This is test data set made by randomly deleting 90% of the rows of the real data set. Use it instead of the
@@ -24,7 +28,6 @@ def import_csv_to_df(filename):
     :params: a csv file
     :return: a df
     """
-
     return pd.read_csv(filename)
 
 
@@ -34,7 +37,6 @@ def export_to_csv(df, location, filename):
     :params: a df and a location in which to save it
     :return: nothing, saves a csv
     """
-
     return df.to_csv(location + filename + '.csv')
 
 
@@ -47,7 +49,6 @@ def cut_to_specific_word(dataframe, specific_word, part_in_bid):
     :return: a dataframe containing only the case studies which had specific word in
              the column of interest
     """
-
     # Cut dataframe down to only those rows with a word in the right column
     current_df = dataframe[dataframe[part_in_bid].str.contains(r'\b' + specific_word + r'\b', regex=True, na=False)]
     # Suppress the annoyingly pedantic SettingWithCopyWarning,
@@ -71,7 +72,6 @@ def associate_new_data(dataframe, df_studies_by_funder):
     :params: a dataframe with case study information, a second dataframe with cases study IDs and other information
     :return: a dataframe containing case study information and other merged information
     """
-
     dataframe = pd.merge(left=dataframe, right=df_studies_by_funder, how='left', left_on='Case Study Id', right_on='Case Study Id')
 
     return dataframe
@@ -91,12 +91,11 @@ def get_col_list(df, search_string):
     return list_cols
 
 
-def summarise_search_terms(df, search_places, cols_list, all_case_study_count):
+def summarise_search_terms(df, search_terms, search_places, cols_list, all_case_study_count):
     """Summarise the results across all words searched for.
 
     :returns: a dataframe with the summary results
     """
-
     summary_data = {}
 
     # Go through the parts in the study and for each one create a list of
@@ -116,7 +115,7 @@ def summarise_search_terms(df, search_places, cols_list, all_case_study_count):
 
     # Now that we've sorted the count for a single word found in the df
     # see how many words have multiple matches
-    for i in range(2, len(SEARCH_TERM_LIST)+1):
+    for i in range(2, len(search_terms)+1):
         shortened_df = df[df['search terms found'] == i]
         count_plus_i_word = {}
         for curr_place in search_places:
@@ -179,7 +178,7 @@ def summarise_uoas(df, df_term_found, list_of_uoas, all_case_study_count):
     return summary_df
 
 
-def summarise_word_popularity(df, all_case_study_count):
+def summarise_word_popularity(df, search_terms, all_case_study_count):
     """Create a summary df of the count of search terms found in the data."""
 
     # Get a list of all the found_in columns
@@ -189,7 +188,7 @@ def summarise_word_popularity(df, all_case_study_count):
 
     matches_to_search_term = {}
 
-    for curr_term in SEARCH_TERM_LIST:
+    for curr_term in search_terms:
         curr_term_match = [s for s in matching if curr_term in s]
         temp_df = df.dropna(subset=[curr_term_match], how='all', axis=0)
         matches_to_search_term[curr_term] = len(temp_df)
@@ -207,7 +206,6 @@ def plot_bar_from_df(df, y_col, title, x_axis_title, y_axis_title):
 
     Pretty charts can be made in the "graphing for presentations code" repo in Github
     """
-
     ax = df.plot(y=y_col, kind='bar', legend=None)
     for i, each in enumerate(df.index):
         y_val = df.ix[each][y_col]
@@ -237,6 +235,9 @@ def main():
     # because it's too uncoupled from the actual case study content
     possible_search_places = ['Title', 'Summary of the impact', 'Underpinning research', 'Details of the impact']
 
+    # Get our search terms from policy_common_data
+    search_terms = SoftwareSearchTerms().data
+
     # Import case study data
     df = import_csv_to_df(DATAFILENAME)
 
@@ -261,7 +262,7 @@ def main():
     # Go through the parts of the bid, and for each one look for the search word, record how
     # many case studies were found to match, then add a new column to identify this location
     # in the original dataframe
-    for word_to_search_for in SEARCH_TERM_LIST:
+    for word_to_search_for in search_terms:
         for part_in_bid in possible_search_places:
             df_cut = cut_to_specific_word(df, word_to_search_for.lower(), part_in_bid)
             df = associate_new_data(df, df_cut)
@@ -291,7 +292,7 @@ def main():
     df_term_identified = df.dropna(axis=0, subset=found_in_cols, how='all')
 
     # Summarise the data across search terms or where they were found
-    df_summary_terms = summarise_search_terms(df_term_identified, possible_search_places, found_in_cols, all_case_study_count)
+    df_summary_terms = summarise_search_terms(df_term_identified, search_terms, possible_search_places, found_in_cols, all_case_study_count)
 
     # Get a summary of the data across funders
     df_summary_funders = summarise_funders(df_term_identified, funder_cols, all_case_study_count)
@@ -300,7 +301,7 @@ def main():
     # NOTE: this uses the full dataframe not the df_term_identified one
     df_summary_uoas = summarise_uoas(df, df_term_identified, list_of_uoas, all_case_study_count)
 
-    df_summary_popularity = summarise_word_popularity(df, all_case_study_count)
+    df_summary_popularity = summarise_word_popularity(df, search_terms, all_case_study_count)
 
     # Write results to CSV files
     export_to_csv(df_term_identified, RESULT_STORE, 'only_case_studies_with_search_term_identified')
